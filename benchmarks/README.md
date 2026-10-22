@@ -39,6 +39,7 @@
 ```powershell
 .venv\Scripts\python.exe benchmarks\run_matrix.py --run-root out\benchmarks\new_matrix
 .venv\Scripts\python.exe benchmarks\evaluate.py --run-root out\benchmarks\new_matrix
+.venv\Scripts\python.exe benchmarks\gallery.py --run-root out\benchmarks\new_matrix
 ```
 
 输出目录必须是新的，不覆盖旧试验。可使用 `--prepare-only` 先冻结输入，再用 `--prepared` 启动；`--models` 和 `--tasks` 可用于明确记录的部分试验。不会静默重跑失败模型并只保留最好的一次。
@@ -65,3 +66,7 @@
 机器验收检查 GLB/UV/绑定、指定组件与插座、自定义像素是否实际变化、最终版本图片是否真正被读取、版本更新纪律。美术质量通过相同相机的真实渲染另行查看，不用工具成功数替代。
 
 本工具集的角色体型是固定模板，允许的颜色、图案和组件有限，因此本轮评估的是组件组合、像素设计、工具使用和看图检查能力。每个模型每项只运行一次，结论只适用于本轮，不构成模型整体能力排名。
+
+## 已完成轮次
+
+[2026-10-22 结果记录](results/20261022.md)：四模型、两任务共八项，七项通过，Luna 僵尸因像素坐标越界未生成。原始产物和离线对照画廊保存在该记录链接的本地输出目录中。

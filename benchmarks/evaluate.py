@@ -93,13 +93,17 @@ def _objects(observation: dict) -> list[dict]:
 
 
 def _call_summary(audit: list[dict]) -> dict:
-    calls = [row for row in audit if row.get("event") == "tool_call"]
-    started = [row for row in audit if row.get("event") == "tool_call_started"]
+    # A completed record reports launches for THAT call, not a cumulative
+    # session counter. Deduplicate replayed records before summing launches.
+    calls = list({(row.get("session_id"), row.get("tool_call_number")): row
+                  for row in audit if row.get("event") == "tool_call"}.values())
+    started = list({(row.get("session_id"), row.get("tool_call_number")): row
+                    for row in audit if row.get("event") == "tool_call_started"}.values())
     completed_ids = {(row.get("session_id"), row.get("tool_call_number")) for row in calls}
     unique_calls = {(row.get("session_id"), row.get("tool_call_number")): row for row in started + calls}
     sessions = {row.get("session_id") for row in audit if row.get("session_id")}
-    worker_counts = {session: max((row.get("worker_runs", 0) for row in audit
-                                  if row.get("session_id") == session and isinstance(row.get("worker_runs", 0), (int, float))), default=0)
+    worker_counts = {session: sum(row.get("worker_runs", 0) for row in calls
+                                 if row.get("session_id") == session and isinstance(row.get("worker_runs", 0), (int, float)))
                      for session in sessions}
     incomplete = [row.get("tool_call_number") for row in started
                   if (row.get("session_id"), row.get("tool_call_number")) not in completed_ids]
@@ -112,6 +116,8 @@ def _call_summary(audit: list[dict]) -> dict:
             "session_ids": sorted(sessions), "session_count": len(sessions),
             "build_attempts": sum(row.get("tool") == "build_asset" and row.get("budget_admitted") is True for row in unique_calls.values()),
             "worker_runs_reported": sum(worker_counts.values()), "worker_runs_by_session": worker_counts,
+            "worker_runs_is_known_lower_bound": bool(incomplete),
+            "worker_runs_counting": "Sum of deduplicated completed calls; incomplete calls may have launched unrecorded workers" if incomplete else "Sum of deduplicated completed calls",
             "tool_duration_seconds_sum": sum(row.get("duration_seconds", 0) for row in calls if isinstance(row.get("duration_seconds"), (int, float)))}
 
 
@@ -286,6 +292,41 @@ def _preview_evidence(calls: list[dict], manifest: dict, observation: dict, revi
             "invalid_evidence_calls": invalid}
 
 
+def _inspection_evidence(calls: list[dict], observation: dict, asset_id: str, revision: str, task: str) -> dict:
+    allowed_kits = {"house_shell_2m_v1", "roof_gable_35_v1"} if task == "house" else {"humanoid_round_v1"}
+    targets = {obj.get("id", obj.get("object_id")): obj["kit_id"] for obj in _objects(observation)
+               if obj.get("kit_id") in allowed_kits}
+    matches = []
+    for call in calls:
+        arguments = call.get("input", {})
+        resolved = (call.get("result_summary") or {}).get("revision") or (call.get("evidence") or {}).get("resolved_revision")
+        if (call.get("tool") == "inspect_object" and call.get("ok") is True
+            and arguments.get("asset_id") == asset_id and arguments.get("revision") == revision
+            and resolved == revision and arguments.get("object_id") in targets):
+            matches.append({"tool_call_number": call.get("tool_call_number"), "object_id": arguments["object_id"],
+                            "kit_id": targets[arguments["object_id"]], "revision": revision})
+    return {"passed": bool(matches), "required_object_kits": sorted(allowed_kits), "successful_inspections": matches}
+
+
+def _final_response_evidence(text: str, manifest: dict, revision: str) -> dict:
+    mentioned_revisions = re.findall(r"(?<![0-9a-f])[0-9a-f]{16}(?![0-9a-f])", text)
+    mentioned_artifacts = sorted(set(re.findall(r"\ba_[0-9a-f]{12}\b", text)))
+    glb_artifacts = {artifact_id for artifact_id, artifact in manifest.get("artifacts", {}).items()
+                     if artifact.get("mime_type") == "model/gltf-binary"}
+    matching = sorted(glb_artifacts.intersection(mentioned_artifacts))
+    checks = {"current_revision_mentioned": revision in mentioned_revisions,
+              "GLB_artifact_id_mentioned": bool(matching)}
+    return {"passed": all(checks.values()), **checks, "mentioned_revisions": mentioned_revisions,
+            "mentioned_artifact_ids": mentioned_artifacts, "matching_glb_artifact_ids": matching}
+
+
+def _report_status(config: dict, runs: list[dict]) -> str:
+    if config.get("status"):
+        return config["status"]
+    terminal = {"completed", "failed", "timed_out", "timeout", "cancelled", "canceled", "infrastructure_aborted"}
+    return "completed" if runs and all(run.get("status") in terminal for run in runs) else "observing"
+
+
 def evaluate_run(run_dir: Path, alias: str, task: str, configured_model: str, root_config: dict) -> dict:
     result = {"run": run_dir.name, "alias": alias, "task": task, "run_directory": str(run_dir),
               "requested_model": configured_model, "configured_model": "unknown", "confirmed_model": "unknown",
@@ -304,7 +345,7 @@ def evaluate_run(run_dir: Path, alias: str, task: str, configured_model: str, ro
         counts = result["tool_calls"]
         deviations = []
         if counts["session_count"] > 1:
-            deviations.append("MCP server restarted or multiple sessions used; per-process budgets are not a shared quota")
+            deviations.append("MCP restart or multiple sessions observed; trial isolation changed, while persisted audit starts retain the shared call/build quota")
         if counts["total_including_incomplete"] > root_config.get("max_tool_calls", 40):
             deviations.append("Total tools/call count exceeds trial quota")
         if counts["build_attempts"] > root_config.get("max_build_calls", 3):
@@ -408,8 +449,14 @@ def evaluate_run(run_dir: Path, alias: str, task: str, configured_model: str, ro
             image["absolute_path"] = str(contained_file(directory, image["path"]))
         result["contact_sheet_path"] = str(contained_file(directory, observation["contact_sheet"]))
         _gate(result, "final_revision_images_read", result["previews"]["passed"], **result["previews"]["checks"])
+        result["inspection"] = _inspection_evidence(calls, observation, asset_id, revision, task)
+        _gate(result, "final_revision_object_inspected", result["inspection"]["passed"],
+              **{key: value for key, value in result["inspection"].items() if key != "passed"})
         final_text = (run_dir / "final.md").read_text(encoding="utf-8", errors="replace") if (run_dir / "final.md").is_file() else ""
-        result["final_response_mentions_revision"] = revision in final_text
+        result["final_response"] = _final_response_evidence(final_text, manifest, revision)
+        result["final_response_mentions_revision"] = result["final_response"]["current_revision_mentioned"]
+        _gate(result, "final_response_identifies_delivery", result["final_response"]["passed"],
+              **{key: value for key, value in result["final_response"].items() if key != "passed"})
         return _finish(result)
     except (OSError, ValueError, KeyError, TypeError, IndexError, ImportError) as exc:
         result["evaluation_errors"].append({"type": type(exc).__name__, "message": str(exc)})
@@ -480,6 +527,11 @@ def _markdown(report: dict) -> str:
             for image in run["previews"]["read_images"]:
                 label = f"{image.get('mode')}/{image.get('camera')}/{image.get('pose')}"
                 lines.append(f"- {link(image['absolute_path'], label)}")
+        if run.get("inspection", {}).get("successful_inspections"):
+            objects = sorted({item["object_id"] for item in run["inspection"]["successful_inspections"]})
+            lines.extend(["", "已检查最终版本关键对象：" + "、".join(f"`{object_id}`" for object_id in objects) + "。"])
+        if run.get("final_response", {}).get("passed"):
+            lines.extend(["", "最终回复中的 revision 与 GLB artifact_id 已核对为本次发布产物。"])
         if run.get("painting", {}).get("tiles"):
             lines.extend(["", "贴图证据（tile：不同 marks 坐标数 / 实际自定义变色像素数）：", ""])
             for tile in run["painting"]["tiles"]:
@@ -547,6 +599,7 @@ def main(argv=None) -> int:
                 _gate(result, "frozen_backend_integrity", not fingerprint_errors, mismatched_files=fingerprint_errors)
                 _finish(result)
             report["runs"].append(result)
+    report["status"] = _report_status(config, report["runs"])
     report["counts"] = {"runs": len(report["runs"]),
                         "observed_trials": sum(run["eligible_for_comparison"] for run in report["runs"]),
                         "excluded_trials": sum(not run["eligible_for_comparison"] for run in report["runs"]),
