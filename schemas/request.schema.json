@@ -1,0 +1,752 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:blender3dtile:request:0.2.0",
+  "title": "Blender3DTile constrained construction and revision-bound observation API",
+  "description": "Two public transports: get_catalog and build_asset. Recipe commands share these definitions for a future thin MCP adapter. No Python, paths, URLs, raw vertices, raw UVs, modifiers, or free bone transforms.",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/get_catalog"
+    },
+    {
+      "$ref": "#/$defs/build_asset"
+    },
+    {
+      "$ref": "#/$defs/observe_asset"
+    },
+    {
+      "$ref": "#/$defs/inspect_object"
+    },
+    {
+      "$ref": "#/$defs/read_preview"
+    }
+  ],
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]{0,47}$"
+    },
+    "kit_id": {
+      "enum": [
+        "house_shell_2m_v1",
+        "roof_gable_35_v1",
+        "door_roundtop_v1",
+        "window_square_v1",
+        "beam_bevel_v1",
+        "ramp_30_v1",
+        "barrel_12_v1",
+        "humanoid_round_v1"
+      ]
+    },
+    "tile_id": {
+      "enum": [
+        "env_wall_cream",
+        "env_roof_rust",
+        "env_wood_oak",
+        "env_stone_slate",
+        "env_iron_dark",
+        "env_glass_blue",
+        "char_skin_mint",
+        "char_face_sleepy",
+        "char_shirt_plum",
+        "char_jeans_indigo",
+        "char_shoes_dark"
+      ]
+    },
+    "region_id": {
+      "enum": [
+        "wall_front",
+        "wall_back",
+        "wall_left",
+        "wall_right",
+        "floor",
+        "reveals",
+        "roof_left",
+        "roof_right",
+        "gable_front",
+        "gable_back",
+        "trim",
+        "panel",
+        "frame",
+        "handle",
+        "glass",
+        "body",
+        "endcap",
+        "slope",
+        "bands",
+        "face",
+        "head",
+        "neck",
+        "torso",
+        "upper_arm_l",
+        "upper_arm_r",
+        "forearm_l",
+        "forearm_r",
+        "hand_l",
+        "hand_r",
+        "pelvis",
+        "thigh_l",
+        "thigh_r",
+        "shin_l",
+        "shin_r",
+        "foot_l",
+        "foot_r"
+      ]
+    },
+    "slot": {
+      "enum": [
+        "wall",
+        "roof",
+        "wood",
+        "stone",
+        "metal",
+        "glass",
+        "skin",
+        "face",
+        "shirt",
+        "jeans",
+        "shoes"
+      ]
+    },
+    "socket": {
+      "enum": [
+        "roof_mount",
+        "door_mount",
+        "window_left",
+        "window_right",
+        "base",
+        "mount"
+      ]
+    },
+    "pos": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "type": "number",
+        "minimum": -64,
+        "maximum": 64,
+        "multipleOf": 0.125
+      }
+    },
+    "rot": {
+      "enum": [
+        "yaw_0",
+        "yaw_90",
+        "yaw_180",
+        "yaw_270"
+      ]
+    },
+    "scale": {
+      "enum": [
+        0.5,
+        1,
+        2
+      ]
+    },
+    "place": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "op": {
+          "const": "place"
+        },
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "kit_id": {
+          "$ref": "#/$defs/kit_id"
+        },
+        "pos": {
+          "$ref": "#/$defs/pos"
+        },
+        "rot": {
+          "$ref": "#/$defs/rot"
+        },
+        "scale": {
+          "$ref": "#/$defs/scale"
+        }
+      },
+      "required": [
+        "op",
+        "id",
+        "kit_id",
+        "pos",
+        "rot",
+        "scale"
+      ]
+    },
+    "attach": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "op": {
+          "const": "attach"
+        },
+        "child": {
+          "$ref": "#/$defs/id"
+        },
+        "child_socket": {
+          "$ref": "#/$defs/socket"
+        },
+        "parent": {
+          "$ref": "#/$defs/id"
+        },
+        "parent_socket": {
+          "$ref": "#/$defs/socket"
+        },
+        "mate": {
+          "const": "flush"
+        }
+      },
+      "required": [
+        "op",
+        "child",
+        "child_socket",
+        "parent",
+        "parent_socket",
+        "mate"
+      ]
+    },
+    "assign_slot": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "op": {
+          "const": "assign_slot"
+        },
+        "mesh": {
+          "$ref": "#/$defs/id"
+        },
+        "region": {
+          "$ref": "#/$defs/region_id"
+        },
+        "slot": {
+          "$ref": "#/$defs/slot"
+        }
+      },
+      "required": [
+        "op",
+        "mesh",
+        "region",
+        "slot"
+      ]
+    },
+    "set_region_uv": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "op": {
+          "const": "set_region_uv"
+        },
+        "mesh": {
+          "$ref": "#/$defs/id"
+        },
+        "region": {
+          "$ref": "#/$defs/region_id"
+        },
+        "tile_id": {
+          "$ref": "#/$defs/tile_id"
+        },
+        "orientation": {
+          "enum": [
+            0,
+            90,
+            180,
+            270
+          ]
+        }
+      },
+      "required": [
+        "op",
+        "mesh",
+        "region",
+        "tile_id",
+        "orientation"
+      ]
+    },
+    "pixel": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "x": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 255
+        },
+        "y": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 255
+        },
+        "color_index": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 15
+        }
+      },
+      "required": [
+        "x",
+        "y",
+        "color_index"
+      ]
+    },
+    "paint_tile": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "op": {
+          "const": "paint_tile"
+        },
+        "tile_id": {
+          "$ref": "#/$defs/tile_id"
+        },
+        "pattern": {
+          "enum": [
+            "solid",
+            "plaster",
+            "checker",
+            "roof_shingles",
+            "planks",
+            "skin_speckle",
+            "face_zombie",
+            "face_cute",
+            "stitches",
+            "denim"
+          ]
+        },
+        "palette": {
+          "enum": [
+            "pastel16",
+            "zombie16"
+          ]
+        },
+        "marks": {
+          "type": "array",
+          "maxItems": 2048,
+          "items": {
+            "$ref": "#/$defs/pixel"
+          }
+        }
+      },
+      "required": [
+        "op",
+        "tile_id",
+        "pattern",
+        "palette"
+      ],
+      "description": "Paint inner rectangle then regenerate padding. Coordinates are tile-content-local pixels. Semantic validation checks actual bounds. Each tile may be painted only once per recipe; all consumers share the result."
+    },
+    "bind_humanoid": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "op": {
+          "const": "bind_humanoid"
+        },
+        "mesh": {
+          "$ref": "#/$defs/id"
+        },
+        "preset": {
+          "enum": [
+            "humanoid_20_v1"
+          ]
+        }
+      },
+      "required": [
+        "op",
+        "mesh",
+        "preset"
+      ]
+    },
+    "validate": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "op": {
+          "const": "validate"
+        },
+        "profile": {
+          "enum": [
+            "prop_v1",
+            "character_v1"
+          ]
+        }
+      },
+      "required": [
+        "op",
+        "profile"
+      ]
+    },
+    "render_preview": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "op": {
+          "const": "render_preview"
+        },
+        "camera": {
+          "enum": [
+            "front",
+            "side",
+            "back",
+            "three_quarter"
+          ]
+        },
+        "pose": {
+          "enum": [
+            "rest",
+            "arms_raise_90",
+            "arms_raise_120",
+            "elbows_bend_90"
+          ]
+        },
+        "texture_view": {
+          "enum": [
+            "final",
+            "uv_debug"
+          ]
+        }
+      },
+      "required": [
+        "op",
+        "camera",
+        "pose",
+        "texture_view"
+      ],
+      "description": "Pose applies only to a temporary evaluation copy; static scenes support rest only."
+    },
+    "export_glb": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "op": {
+          "const": "export_glb"
+        },
+        "profile": {
+          "const": "game_pixel_v1"
+        },
+        "clips": {
+          "enum": [
+            "none",
+            "rig_smoke_v1"
+          ]
+        }
+      },
+      "required": [
+        "op",
+        "profile",
+        "clips"
+      ],
+      "description": "Exactly one export command, last in recipe. Exporter always runs validation; scenes with characters require successful binding. rig_smoke_v1 requires a character."
+    },
+    "command": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/place"
+        },
+        {
+          "$ref": "#/$defs/attach"
+        },
+        {
+          "$ref": "#/$defs/assign_slot"
+        },
+        {
+          "$ref": "#/$defs/set_region_uv"
+        },
+        {
+          "$ref": "#/$defs/paint_tile"
+        },
+        {
+          "$ref": "#/$defs/bind_humanoid"
+        },
+        {
+          "$ref": "#/$defs/validate"
+        },
+        {
+          "$ref": "#/$defs/render_preview"
+        },
+        {
+          "$ref": "#/$defs/export_glb"
+        }
+      ]
+    },
+    "recipe": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": "0.2.0"
+        },
+        "catalog_version": {
+          "const": "starter_v1"
+        },
+        "catalog_sha256": {
+          "const": "f644e512118b8161f39851a96d85898eedda582b46dc450fdfdb08a3bf4d61aa"
+        },
+        "asset_id": {
+          "$ref": "#/$defs/id"
+        },
+        "asset_kind": {
+          "enum": [
+            "prop",
+            "character"
+          ]
+        },
+        "seed": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        },
+        "texture_profile": {
+          "const": "pixel_atlas_v1"
+        },
+        "ops": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 256,
+          "items": {
+            "$ref": "#/$defs/command"
+          },
+          "contains": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "op": {
+                "const": "export_glb"
+              },
+              "profile": {
+                "const": "game_pixel_v1"
+              },
+              "clips": {
+                "enum": [
+                  "none",
+                  "rig_smoke_v1"
+                ]
+              }
+            },
+            "required": [
+              "op",
+              "profile",
+              "clips"
+            ]
+          },
+          "minContains": 1,
+          "maxContains": 1,
+          "allOf": [
+            {
+              "contains": {
+                "$ref": "#/$defs/place"
+              },
+              "minContains": 1
+            }
+          ]
+        }
+      },
+      "required": [
+        "schema_version",
+        "catalog_version",
+        "catalog_sha256",
+        "asset_id",
+        "asset_kind",
+        "seed",
+        "texture_profile",
+        "ops"
+      ],
+      "description": "A complete declarative build. Schema and runtime semantic validation are both required. Previews and checks refer to the final frozen scene."
+    },
+    "get_catalog": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "method": {
+          "const": "get_catalog"
+        },
+        "request_id": {
+          "$ref": "#/$defs/id"
+        },
+        "params": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "catalog_version": {
+              "const": "starter_v1"
+            }
+          },
+          "required": [
+            "catalog_version"
+          ]
+        }
+      },
+      "required": [
+        "method",
+        "request_id",
+        "params"
+      ]
+    },
+    "build_asset": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "method": {
+          "const": "build_asset"
+        },
+        "request_id": {
+          "$ref": "#/$defs/id"
+        },
+        "params": {
+          "$ref": "#/$defs/recipe"
+        },
+        "expected_revision": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[0-9a-f]{16}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "method",
+        "request_id",
+        "params"
+      ]
+    },
+    "observe_asset": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "method": {
+          "const": "observe_asset"
+        },
+        "request_id": {
+          "$ref": "#/$defs/id"
+        },
+        "params": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "asset_id": {
+              "$ref": "#/$defs/id"
+            },
+            "revision": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{16}$"
+                },
+                {
+                  "const": "latest"
+                }
+              ]
+            },
+            "known_revision": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{16}$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "detail": {
+              "enum": [
+                "summary",
+                "full"
+              ]
+            }
+          },
+          "required": [
+            "asset_id"
+          ]
+        }
+      },
+      "required": [
+        "method",
+        "request_id",
+        "params"
+      ]
+    },
+    "inspect_object": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "method": {
+          "const": "inspect_object"
+        },
+        "request_id": {
+          "$ref": "#/$defs/id"
+        },
+        "params": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "asset_id": {
+              "$ref": "#/$defs/id"
+            },
+            "revision": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{16}$"
+            },
+            "object_id": {
+              "$ref": "#/$defs/id"
+            }
+          },
+          "required": [
+            "asset_id",
+            "revision",
+            "object_id"
+          ]
+        }
+      },
+      "required": [
+        "method",
+        "request_id",
+        "params"
+      ]
+    },
+    "read_preview": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "method": {
+          "const": "read_preview"
+        },
+        "request_id": {
+          "$ref": "#/$defs/id"
+        },
+        "params": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "asset_id": {
+              "$ref": "#/$defs/id"
+            },
+            "revision": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{16}$"
+            },
+            "artifact_id": {
+              "type": "string",
+              "pattern": "^a_[0-9a-f]{12}$"
+            }
+          },
+          "required": [
+            "asset_id",
+            "revision",
+            "artifact_id"
+          ]
+        }
+      },
+      "required": [
+        "method",
+        "request_id",
+        "params"
+      ]
+    }
+  }
+}

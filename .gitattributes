@@ -1,0 +1,2 @@
+# Catalog/source locks hash exact bytes; keep checkouts identical on every OS.
+* -text

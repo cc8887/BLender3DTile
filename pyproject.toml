@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "blender3dtile"
+version = "0.1.0"
+description = "Enumerated game asset recipes with Blender workers and revision-bound AI observations"
+requires-python = ">=3.11,<3.12"
+dependencies = ["jsonschema==4.26.0", "Pillow==12.3.0"]
+
+[project.optional-dependencies]
+backend = ["bpy==4.5.14"]
+mcp = ["mcp==1.30.0"]
+test = ["pytest==9.1.1"]
+
+[project.scripts]
+b3dtile = "b3dtile.cli:main"
+b3dtile-mcp = "b3dtile.mcp_server:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.data-files]
+"share/b3dtile/catalog" = ["catalog/*.json"]
+"share/b3dtile/schemas" = ["schemas/*.json"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["blender: requires the pinned bpy backend", "integration: builds complete assets"]

@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "blender3dtile": {
+      "command": "G:\\Github\\BLender3DTile\\.venv\\Scripts\\python.exe",
+      "args": [
+        "-m", "b3dtile.mcp_server",
+        "--output-root", "G:\\Github\\BLender3DTile\\out"
+      ]
+    }
+  }
+}

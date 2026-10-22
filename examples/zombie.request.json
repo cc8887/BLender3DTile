@@ -1,0 +1,102 @@
+{
+  "method": "build_asset",
+  "request_id": "zombie_demo_starter_v1",
+  "params": {
+    "schema_version": "0.2.0",
+    "catalog_version": "starter_v1",
+    "catalog_sha256": "f644e512118b8161f39851a96d85898eedda582b46dc450fdfdb08a3bf4d61aa",
+    "asset_id": "zombie_demo",
+    "asset_kind": "character",
+    "seed": 42,
+    "texture_profile": "pixel_atlas_v1",
+    "ops": [
+      {
+        "op": "paint_tile",
+        "tile_id": "char_skin_mint",
+        "pattern": "skin_speckle",
+        "palette": "zombie16"
+      },
+      {
+        "op": "paint_tile",
+        "tile_id": "char_face_sleepy",
+        "pattern": "face_zombie",
+        "palette": "zombie16",
+        "marks": [
+          {
+            "x": 25,
+            "y": 40,
+            "color_index": 1
+          },
+          {
+            "x": 26,
+            "y": 40,
+            "color_index": 1
+          }
+        ]
+      },
+      {
+        "op": "paint_tile",
+        "tile_id": "char_shirt_plum",
+        "pattern": "stitches",
+        "palette": "zombie16"
+      },
+      {
+        "op": "paint_tile",
+        "tile_id": "char_jeans_indigo",
+        "pattern": "denim",
+        "palette": "zombie16"
+      },
+      {
+        "op": "place",
+        "id": "zombie",
+        "kit_id": "humanoid_round_v1",
+        "pos": [
+          0,
+          0,
+          0
+        ],
+        "rot": "yaw_0",
+        "scale": 1
+      },
+      {
+        "op": "assign_slot",
+        "mesh": "zombie",
+        "region": "torso",
+        "slot": "shirt"
+      },
+      {
+        "op": "set_region_uv",
+        "mesh": "zombie",
+        "region": "torso",
+        "tile_id": "char_shirt_plum",
+        "orientation": 0
+      },
+      {
+        "op": "bind_humanoid",
+        "mesh": "zombie",
+        "preset": "humanoid_20_v1"
+      },
+      {
+        "op": "validate",
+        "profile": "character_v1"
+      },
+      {
+        "op": "render_preview",
+        "camera": "front",
+        "pose": "arms_raise_90",
+        "texture_view": "uv_debug"
+      },
+      {
+        "op": "render_preview",
+        "camera": "three_quarter",
+        "pose": "elbows_bend_90",
+        "texture_view": "final"
+      },
+      {
+        "op": "export_glb",
+        "profile": "game_pixel_v1",
+        "clips": "rig_smoke_v1"
+      }
+    ]
+  }
+}

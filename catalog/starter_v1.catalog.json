@@ -1,0 +1,1256 @@
+{
+  "catalog_version": "starter_v1",
+  "status": "implemented_procedural_templates",
+  "coordinates": {
+    "units": "meters",
+    "handedness": "right",
+    "up": "+Z",
+    "forward": "-Y",
+    "character_left": "+X",
+    "position_step_m": 0.125,
+    "rotation_order": "XYZ",
+    "scale_policy": "uniform positive root scale; mesh/armature local transforms canonical"
+  },
+  "runtime_policy": {
+    "blender_baseline": "bpy/Blender 4.5.14, Python 3.11",
+    "scene_reset": "new empty scene per build",
+    "max_ops": 256,
+    "max_instances": 128,
+    "export_last_and_exactly_once": true,
+    "fail_atomic": true
+  },
+  "kits": [
+    {
+      "id": "house_shell_2m_v1",
+      "kind": "static",
+      "description": "2 m x 2 m shell, height 2 m; real door/window openings; floor pivot at [0,0,0]",
+      "sockets": {
+        "roof_mount": {
+          "type": "roof_2m",
+          "pos_m": [
+            0,
+            0,
+            2
+          ],
+          "rot_xyz_deg": [
+            0,
+            0,
+            0
+          ],
+          "capacity": 1
+        },
+        "door_mount": {
+          "type": "door_roundtop",
+          "pos_m": [
+            0,
+            -1,
+            0
+          ],
+          "rot_xyz_deg": [
+            0,
+            0,
+            0
+          ],
+          "capacity": 1
+        },
+        "window_left": {
+          "type": "window_050",
+          "pos_m": [
+            -1,
+            0,
+            1.25
+          ],
+          "rot_xyz_deg": [
+            0,
+            0,
+            -90
+          ],
+          "capacity": 1
+        },
+        "window_right": {
+          "type": "window_050",
+          "pos_m": [
+            1,
+            0,
+            1.25
+          ],
+          "rot_xyz_deg": [
+            0,
+            0,
+            90
+          ],
+          "capacity": 1
+        }
+      },
+      "status": "implemented",
+      "source": "builtin:b3dtile.geometry.build_kit/house_shell_2m_v1",
+      "regions": {
+        "wall_front": {
+          "allowed_slots": [
+            "wall"
+          ],
+          "default_slot": "wall",
+          "uv_template": "authored_tile_grid_050m_v1",
+          "allowed_uv_rotations": [
+            0,
+            90,
+            180,
+            270
+          ]
+        },
+        "wall_back": {
+          "allowed_slots": [
+            "wall"
+          ],
+          "default_slot": "wall",
+          "uv_template": "authored_tile_grid_050m_v1",
+          "allowed_uv_rotations": [
+            0,
+            90,
+            180,
+            270
+          ]
+        },
+        "wall_left": {
+          "allowed_slots": [
+            "wall"
+          ],
+          "default_slot": "wall",
+          "uv_template": "authored_tile_grid_050m_v1",
+          "allowed_uv_rotations": [
+            0,
+            90,
+            180,
+            270
+          ]
+        },
+        "wall_right": {
+          "allowed_slots": [
+            "wall"
+          ],
+          "default_slot": "wall",
+          "uv_template": "authored_tile_grid_050m_v1",
+          "allowed_uv_rotations": [
+            0,
+            90,
+            180,
+            270
+          ]
+        },
+        "floor": {
+          "allowed_slots": [
+            "stone"
+          ],
+          "default_slot": "stone",
+          "uv_template": "authored_tile_grid_050m_v1",
+          "allowed_uv_rotations": [
+            0,
+            90,
+            180,
+            270
+          ]
+        },
+        "reveals": {
+          "allowed_slots": [
+            "wood"
+          ],
+          "default_slot": "wood",
+          "uv_template": "authored_tile_grid_050m_v1",
+          "allowed_uv_rotations": [
+            0,
+            90,
+            180,
+            270
+          ]
+        }
+      }
+    },
+    {
+      "id": "roof_gable_35_v1",
+      "kind": "static",
+      "description": "2 m x 2 m gable roof, real 35 degree slopes, 0.15 m eaves; closed gables; origin at wall-top plane",
+      "sockets": {
+        "base": {
+          "type": "roof_2m",
+          "pos_m": [
+            0,
+            0,
+            0
+          ],
+          "rot_xyz_deg": [
+            0,
+            0,
+            0
+          ],
+          "capacity": 1
+        }
+      },
+      "status": "implemented",
+      "source": "builtin:b3dtile.geometry.build_kit/roof_gable_35_v1",
+      "regions": {
+        "roof_left": {
+          "allowed_slots": [
+            "roof"
+          ],
+          "default_slot": "roof",
+          "uv_template": "authored_tile_grid_050m_v1",
+          "allowed_uv_rotations": [
+            0,
+            90,
+            180,
+            270
+          ]
+        },
+        "roof_right": {
+          "allowed_slots": [
+            "roof"
+          ],
+          "default_slot": "roof",
+          "uv_template": "authored_tile_grid_050m_v1",
+          "allowed_uv_rotations": [
+            0,
+            90,
+            180,
+            270
+          ]
+        },
+        "gable_front": {
+          "allowed_slots": [
+            "wall"
+          ],
+          "default_slot": "wall",
+          "uv_template": "authored_tile_grid_050m_v1",
+          "allowed_uv_rotations": [
+            0,
+            90,
+            180,
+            270
+          ]
+        },
+        "gable_back": {
+          "allowed_slots": [
+            "wall"
+          ],
+          "default_slot": "wall",
+          "uv_template": "authored_tile_grid_050m_v1",
+          "allowed_uv_rotations": [
+            0,
+            90,
+            180,
+            270
+          ]
+        },
+        "trim": {
+          "allowed_slots": [
+            "wood"
+          ],
+          "default_slot": "wood",
+          "uv_template": "authored_tile_grid_050m_v1",
+          "allowed_uv_rotations": [
+            0,
+            90,
+            180,
+            270
+          ]
+        }
+      }
+    },
+    {
+      "id": "door_roundtop_v1",
+      "kind": "static",
+      "description": "0.75 m x 1.75 m arched door assembly; pivot at bottom center; front -Y",
+      "sockets": {
+        "mount": {
+          "type": "door_roundtop",
+          "pos_m": [
+            0,
+            0,
+            0
+          ],
+          "rot_xyz_deg": [
+            0,
+            0,
+            0
+          ],
+          "capacity": 1
+        }
+      },
+      "status": "implemented",
+      "source": "builtin:b3dtile.geometry.build_kit/door_roundtop_v1",
+      "regions": {
+        "panel": {
+          "allowed_slots": [
+            "wood"
+          ],
+          "default_slot": "wood",
+          "uv_template": "authored_tile_grid_050m_v1",
+          "allowed_uv_rotations": [
+            0,
+            90,
+            180,
+            270
+          ]
+        },
+        "frame": {
+          "allowed_slots": [
+            "wood"
+          ],
+          "default_slot": "wood",
+          "uv_template": "authored_tile_grid_050m_v1",
+          "allowed_uv_rotations": [
+            0,
+            90,
+            180,
+            270
+          ]
+        },
+        "handle": {
+          "allowed_slots": [
+            "metal"
+          ],
+          "default_slot": "metal",
+          "uv_template": "authored_tile_grid_050m_v1",
+          "allowed_uv_rotations": [
+            0,
+            90,
+            180,
+            270
+          ]
+        }
+      }
+    },
+    {
+      "id": "window_square_v1",
+      "kind": "static",
+      "description": "0.5 m x 0.5 m window assembly; pivot at center; front -Y",
+      "sockets": {
+        "mount": {
+          "type": "window_050",
+          "pos_m": [
+            0,
+            0,
+            0
+          ],
+          "rot_xyz_deg": [
+            0,
+            0,
+            0
+          ],
+          "capacity": 1
+        }
+      },
+      "status": "implemented",
+      "source": "builtin:b3dtile.geometry.build_kit/window_square_v1",
+      "regions": {
+        "frame": {
+          "allowed_slots": [
+            "wood"
+          ],
+          "default_slot": "wood",
+          "uv_template": "authored_tile_grid_050m_v1",
+          "allowed_uv_rotations": [
+            0,
+            90,
+            180,
+            270
+          ]
+        },
+        "glass": {
+          "allowed_slots": [
+            "glass"
+          ],
+          "default_slot": "glass",
+          "uv_template": "authored_tile_grid_050m_v1",
+          "allowed_uv_rotations": [
+            0,
+            90,
+            180,
+            270
+          ]
+        }
+      }
+    },
+    {
+      "id": "beam_bevel_v1",
+      "kind": "static",
+      "description": "0.1 m x 0.1 m x 1 m beam with real baked bevel; bottom pivot",
+      "sockets": {},
+      "status": "implemented",
+      "source": "builtin:b3dtile.geometry.build_kit/beam_bevel_v1",
+      "regions": {
+        "body": {
+          "allowed_slots": [
+            "wood"
+          ],
+          "default_slot": "wood",
+          "uv_template": "authored_tile_grid_050m_v1",
+          "allowed_uv_rotations": [
+            0,
+            90,
+            180,
+            270
+          ]
+        },
+        "endcap": {
+          "allowed_slots": [
+            "wood"
+          ],
+          "default_slot": "wood",
+          "uv_template": "authored_tile_grid_050m_v1",
+          "allowed_uv_rotations": [
+            0,
+            90,
+            180,
+            270
+          ]
+        }
+      }
+    },
+    {
+      "id": "ramp_30_v1",
+      "kind": "static",
+      "description": "1 m width, 1 m run, real 30 degree slope, no voxel steps",
+      "sockets": {},
+      "status": "implemented",
+      "source": "builtin:b3dtile.geometry.build_kit/ramp_30_v1",
+      "regions": {
+        "slope": {
+          "allowed_slots": [
+            "stone"
+          ],
+          "default_slot": "stone",
+          "uv_template": "authored_tile_grid_050m_v1",
+          "allowed_uv_rotations": [
+            0,
+            90,
+            180,
+            270
+          ]
+        },
+        "body": {
+          "allowed_slots": [
+            "stone"
+          ],
+          "default_slot": "stone",
+          "uv_template": "authored_tile_grid_050m_v1",
+          "allowed_uv_rotations": [
+            0,
+            90,
+            180,
+            270
+          ]
+        }
+      }
+    },
+    {
+      "id": "barrel_12_v1",
+      "kind": "static",
+      "description": "12-sided barrel, several shaped rings, 0.6 m height; bottom pivot",
+      "sockets": {},
+      "status": "implemented",
+      "source": "builtin:b3dtile.geometry.build_kit/barrel_12_v1",
+      "regions": {
+        "body": {
+          "allowed_slots": [
+            "wood"
+          ],
+          "default_slot": "wood",
+          "uv_template": "authored_tile_grid_050m_v1",
+          "allowed_uv_rotations": [
+            0,
+            90,
+            180,
+            270
+          ]
+        },
+        "bands": {
+          "allowed_slots": [
+            "metal"
+          ],
+          "default_slot": "metal",
+          "uv_template": "authored_tile_grid_050m_v1",
+          "allowed_uv_rotations": [
+            0,
+            90,
+            180,
+            270
+          ]
+        },
+        "endcap": {
+          "allowed_slots": [
+            "wood"
+          ],
+          "default_slot": "wood",
+          "uv_template": "authored_tile_grid_050m_v1",
+          "allowed_uv_rotations": [
+            0,
+            90,
+            180,
+            270
+          ]
+        }
+      }
+    },
+    {
+      "id": "humanoid_round_v1",
+      "kind": "skinned",
+      "description": "Connected manifold rounded humanoid; fixed Skin cage and baked subdivision; 436 vertices, 434 quads; continuous region charts; A rest pose",
+      "sockets": {},
+      "rig_preset": "humanoid_20_v1",
+      "topology_revision": "humanoid_round_topology_v1",
+      "status": "implemented",
+      "source": "builtin:b3dtile.geometry.build_kit/humanoid_round_v1",
+      "regions": {
+        "face": {
+          "allowed_slots": [
+            "face"
+          ],
+          "default_slot": "face",
+          "uv_template": "fixed_chart_v1",
+          "allowed_uv_rotations": [
+            0
+          ]
+        },
+        "head": {
+          "allowed_slots": [
+            "skin"
+          ],
+          "default_slot": "skin",
+          "uv_template": "fixed_chart_v1",
+          "allowed_uv_rotations": [
+            0
+          ]
+        },
+        "neck": {
+          "allowed_slots": [
+            "skin"
+          ],
+          "default_slot": "skin",
+          "uv_template": "fixed_chart_v1",
+          "allowed_uv_rotations": [
+            0
+          ]
+        },
+        "torso": {
+          "allowed_slots": [
+            "shirt"
+          ],
+          "default_slot": "shirt",
+          "uv_template": "fixed_chart_v1",
+          "allowed_uv_rotations": [
+            0
+          ]
+        },
+        "upper_arm_l": {
+          "allowed_slots": [
+            "skin",
+            "shirt"
+          ],
+          "default_slot": "shirt",
+          "uv_template": "fixed_chart_v1",
+          "allowed_uv_rotations": [
+            0
+          ]
+        },
+        "upper_arm_r": {
+          "allowed_slots": [
+            "skin",
+            "shirt"
+          ],
+          "default_slot": "shirt",
+          "uv_template": "fixed_chart_v1",
+          "allowed_uv_rotations": [
+            0
+          ]
+        },
+        "forearm_l": {
+          "allowed_slots": [
+            "skin"
+          ],
+          "default_slot": "skin",
+          "uv_template": "fixed_chart_v1",
+          "allowed_uv_rotations": [
+            0
+          ]
+        },
+        "forearm_r": {
+          "allowed_slots": [
+            "skin"
+          ],
+          "default_slot": "skin",
+          "uv_template": "fixed_chart_v1",
+          "allowed_uv_rotations": [
+            0
+          ]
+        },
+        "hand_l": {
+          "allowed_slots": [
+            "skin"
+          ],
+          "default_slot": "skin",
+          "uv_template": "fixed_chart_v1",
+          "allowed_uv_rotations": [
+            0
+          ]
+        },
+        "hand_r": {
+          "allowed_slots": [
+            "skin"
+          ],
+          "default_slot": "skin",
+          "uv_template": "fixed_chart_v1",
+          "allowed_uv_rotations": [
+            0
+          ]
+        },
+        "pelvis": {
+          "allowed_slots": [
+            "jeans"
+          ],
+          "default_slot": "jeans",
+          "uv_template": "fixed_chart_v1",
+          "allowed_uv_rotations": [
+            0
+          ]
+        },
+        "thigh_l": {
+          "allowed_slots": [
+            "jeans"
+          ],
+          "default_slot": "jeans",
+          "uv_template": "fixed_chart_v1",
+          "allowed_uv_rotations": [
+            0
+          ]
+        },
+        "thigh_r": {
+          "allowed_slots": [
+            "jeans"
+          ],
+          "default_slot": "jeans",
+          "uv_template": "fixed_chart_v1",
+          "allowed_uv_rotations": [
+            0
+          ]
+        },
+        "shin_l": {
+          "allowed_slots": [
+            "jeans"
+          ],
+          "default_slot": "jeans",
+          "uv_template": "fixed_chart_v1",
+          "allowed_uv_rotations": [
+            0
+          ]
+        },
+        "shin_r": {
+          "allowed_slots": [
+            "jeans"
+          ],
+          "default_slot": "jeans",
+          "uv_template": "fixed_chart_v1",
+          "allowed_uv_rotations": [
+            0
+          ]
+        },
+        "foot_l": {
+          "allowed_slots": [
+            "shoes"
+          ],
+          "default_slot": "shoes",
+          "uv_template": "fixed_chart_v1",
+          "allowed_uv_rotations": [
+            0
+          ]
+        },
+        "foot_r": {
+          "allowed_slots": [
+            "shoes"
+          ],
+          "default_slot": "shoes",
+          "uv_template": "fixed_chart_v1",
+          "allowed_uv_rotations": [
+            0
+          ]
+        }
+      },
+      "topology_sha256": "36abec0cf45b2ba9a7eca8fd4e384f3e3a93ea8813cfebcd33fc8321c0ea915f"
+    }
+  ],
+  "socket_types": {
+    "roof_2m": {
+      "interface_size_m": [
+        2,
+        2
+      ],
+      "profile": "horizontal_rectangular_wall_top",
+      "certified_pairs": [
+        [
+          "roof_gable_35_v1:base",
+          "house_shell_2m_v1:roof_mount"
+        ]
+      ]
+    },
+    "door_roundtop": {
+      "interface_size_m": [
+        0.75,
+        1.75
+      ],
+      "profile": "arched_opening_v1",
+      "certified_pairs": [
+        [
+          "door_roundtop_v1:mount",
+          "house_shell_2m_v1:door_mount"
+        ]
+      ]
+    },
+    "window_050": {
+      "interface_size_m": [
+        0.5,
+        0.5
+      ],
+      "profile": "square_opening_v1",
+      "certified_pairs": [
+        [
+          "window_square_v1:mount",
+          "house_shell_2m_v1:window_left"
+        ],
+        [
+          "window_square_v1:mount",
+          "house_shell_2m_v1:window_right"
+        ]
+      ]
+    }
+  },
+  "atlases": [
+    {
+      "id": "environment_v1",
+      "size_px": [
+        256,
+        256
+      ],
+      "rect_origin": "top_left",
+      "color_space": "sRGB",
+      "alpha": "opaque"
+    },
+    {
+      "id": "character_v1",
+      "size_px": [
+        256,
+        256
+      ],
+      "rect_origin": "top_left",
+      "color_space": "sRGB",
+      "alpha": "opaque"
+    }
+  ],
+  "tiles": [
+    {
+      "id": "env_wall_cream",
+      "atlas_id": "environment_v1",
+      "rect_px": [
+        0,
+        0,
+        32,
+        32
+      ],
+      "padding_px": 2,
+      "slot": "wall",
+      "patterns": [
+        "solid",
+        "plaster",
+        "checker"
+      ],
+      "default_pattern": "solid",
+      "default_palette": "pastel16"
+    },
+    {
+      "id": "env_roof_rust",
+      "atlas_id": "environment_v1",
+      "rect_px": [
+        32,
+        0,
+        32,
+        32
+      ],
+      "padding_px": 2,
+      "slot": "roof",
+      "patterns": [
+        "solid",
+        "roof_shingles"
+      ],
+      "default_pattern": "solid",
+      "default_palette": "pastel16"
+    },
+    {
+      "id": "env_wood_oak",
+      "atlas_id": "environment_v1",
+      "rect_px": [
+        64,
+        0,
+        32,
+        32
+      ],
+      "padding_px": 2,
+      "slot": "wood",
+      "patterns": [
+        "solid",
+        "planks"
+      ],
+      "default_pattern": "solid",
+      "default_palette": "pastel16"
+    },
+    {
+      "id": "env_stone_slate",
+      "atlas_id": "environment_v1",
+      "rect_px": [
+        96,
+        0,
+        32,
+        32
+      ],
+      "padding_px": 2,
+      "slot": "stone",
+      "patterns": [
+        "solid",
+        "checker"
+      ],
+      "default_pattern": "solid",
+      "default_palette": "pastel16"
+    },
+    {
+      "id": "env_iron_dark",
+      "atlas_id": "environment_v1",
+      "rect_px": [
+        128,
+        0,
+        32,
+        32
+      ],
+      "padding_px": 2,
+      "slot": "metal",
+      "patterns": [
+        "solid"
+      ],
+      "default_pattern": "solid",
+      "default_palette": "pastel16"
+    },
+    {
+      "id": "env_glass_blue",
+      "atlas_id": "environment_v1",
+      "rect_px": [
+        160,
+        0,
+        32,
+        32
+      ],
+      "padding_px": 2,
+      "slot": "glass",
+      "patterns": [
+        "solid"
+      ],
+      "default_pattern": "solid",
+      "default_palette": "pastel16"
+    },
+    {
+      "id": "char_skin_mint",
+      "atlas_id": "character_v1",
+      "rect_px": [
+        0,
+        0,
+        128,
+        64
+      ],
+      "padding_px": 2,
+      "slot": "skin",
+      "patterns": [
+        "solid",
+        "skin_speckle"
+      ],
+      "default_pattern": "solid",
+      "default_palette": "zombie16"
+    },
+    {
+      "id": "char_face_sleepy",
+      "atlas_id": "character_v1",
+      "rect_px": [
+        128,
+        0,
+        64,
+        64
+      ],
+      "padding_px": 2,
+      "slot": "face",
+      "patterns": [
+        "face_zombie",
+        "face_cute"
+      ],
+      "default_pattern": "face_zombie",
+      "default_palette": "zombie16"
+    },
+    {
+      "id": "char_shirt_plum",
+      "atlas_id": "character_v1",
+      "rect_px": [
+        0,
+        64,
+        128,
+        64
+      ],
+      "padding_px": 2,
+      "slot": "shirt",
+      "patterns": [
+        "solid",
+        "stitches"
+      ],
+      "default_pattern": "solid",
+      "default_palette": "zombie16"
+    },
+    {
+      "id": "char_jeans_indigo",
+      "atlas_id": "character_v1",
+      "rect_px": [
+        0,
+        128,
+        128,
+        96
+      ],
+      "padding_px": 2,
+      "slot": "jeans",
+      "patterns": [
+        "solid",
+        "denim"
+      ],
+      "default_pattern": "solid",
+      "default_palette": "zombie16"
+    },
+    {
+      "id": "char_shoes_dark",
+      "atlas_id": "character_v1",
+      "rect_px": [
+        128,
+        128,
+        64,
+        64
+      ],
+      "padding_px": 2,
+      "slot": "shoes",
+      "patterns": [
+        "solid"
+      ],
+      "default_pattern": "solid",
+      "default_palette": "zombie16"
+    }
+  ],
+  "slots": [
+    {
+      "id": "wall",
+      "default_tile": "env_wall_cream",
+      "allowed_tiles": [
+        "env_wall_cream"
+      ]
+    },
+    {
+      "id": "roof",
+      "default_tile": "env_roof_rust",
+      "allowed_tiles": [
+        "env_roof_rust"
+      ]
+    },
+    {
+      "id": "wood",
+      "default_tile": "env_wood_oak",
+      "allowed_tiles": [
+        "env_wood_oak"
+      ]
+    },
+    {
+      "id": "stone",
+      "default_tile": "env_stone_slate",
+      "allowed_tiles": [
+        "env_stone_slate"
+      ]
+    },
+    {
+      "id": "metal",
+      "default_tile": "env_iron_dark",
+      "allowed_tiles": [
+        "env_iron_dark"
+      ]
+    },
+    {
+      "id": "glass",
+      "default_tile": "env_glass_blue",
+      "allowed_tiles": [
+        "env_glass_blue"
+      ]
+    },
+    {
+      "id": "skin",
+      "default_tile": "char_skin_mint",
+      "allowed_tiles": [
+        "char_skin_mint"
+      ]
+    },
+    {
+      "id": "face",
+      "default_tile": "char_face_sleepy",
+      "allowed_tiles": [
+        "char_face_sleepy"
+      ]
+    },
+    {
+      "id": "shirt",
+      "default_tile": "char_shirt_plum",
+      "allowed_tiles": [
+        "char_shirt_plum"
+      ]
+    },
+    {
+      "id": "jeans",
+      "default_tile": "char_jeans_indigo",
+      "allowed_tiles": [
+        "char_jeans_indigo"
+      ]
+    },
+    {
+      "id": "shoes",
+      "default_tile": "char_shoes_dark",
+      "allowed_tiles": [
+        "char_shoes_dark"
+      ]
+    }
+  ],
+  "palettes": {
+    "pastel16": [
+      "#302B3D",
+      "#5D4B66",
+      "#846A79",
+      "#B9999A",
+      "#EADBC8",
+      "#FFF1D6",
+      "#C65B58",
+      "#EA8B6C",
+      "#73534C",
+      "#A37458",
+      "#C49D72",
+      "#566D66",
+      "#7FA590",
+      "#A9C8A0",
+      "#5F82A8",
+      "#9BC2D4"
+    ],
+    "zombie16": [
+      "#252B35",
+      "#444157",
+      "#62536D",
+      "#8C7196",
+      "#B49CC2",
+      "#D7C6D8",
+      "#3E5E4B",
+      "#63856A",
+      "#8EAD82",
+      "#B8CDA1",
+      "#31485F",
+      "#526B88",
+      "#7991A8",
+      "#B3C4CE",
+      "#DFCA9F",
+      "#F4E6C4"
+    ]
+  },
+  "rig_presets": [
+    {
+      "id": "humanoid_20_v1",
+      "compatible_kits": [
+        "humanoid_round_v1"
+      ],
+      "bones": [
+        {
+          "name": "root",
+          "parent": null
+        },
+        {
+          "name": "pelvis",
+          "parent": "root"
+        },
+        {
+          "name": "spine",
+          "parent": "pelvis"
+        },
+        {
+          "name": "chest",
+          "parent": "spine"
+        },
+        {
+          "name": "neck",
+          "parent": "chest"
+        },
+        {
+          "name": "head",
+          "parent": "neck"
+        },
+        {
+          "name": "clavicle_l",
+          "parent": "chest"
+        },
+        {
+          "name": "upper_arm_l",
+          "parent": "clavicle_l"
+        },
+        {
+          "name": "forearm_l",
+          "parent": "upper_arm_l"
+        },
+        {
+          "name": "hand_l",
+          "parent": "forearm_l"
+        },
+        {
+          "name": "clavicle_r",
+          "parent": "chest"
+        },
+        {
+          "name": "upper_arm_r",
+          "parent": "clavicle_r"
+        },
+        {
+          "name": "forearm_r",
+          "parent": "upper_arm_r"
+        },
+        {
+          "name": "hand_r",
+          "parent": "forearm_r"
+        },
+        {
+          "name": "thigh_l",
+          "parent": "pelvis"
+        },
+        {
+          "name": "shin_l",
+          "parent": "thigh_l"
+        },
+        {
+          "name": "foot_l",
+          "parent": "shin_l"
+        },
+        {
+          "name": "thigh_r",
+          "parent": "pelvis"
+        },
+        {
+          "name": "shin_r",
+          "parent": "thigh_r"
+        },
+        {
+          "name": "foot_r",
+          "parent": "shin_r"
+        }
+      ],
+      "rest_pose": "A_v1",
+      "weight_method": "Versioned anatomical envelopes deterministically generate a normalized vertex-ID weight table; topology checksum is verified before binding. Table is saved in model_data.json.",
+      "max_influences": 4,
+      "skinning": "linear_blend",
+      "preserve_volume": false
+    }
+  ],
+  "pose_presets": [
+    "rest",
+    "arms_raise_90",
+    "arms_raise_120",
+    "elbows_bend_90"
+  ],
+  "camera_presets": [
+    "front",
+    "side",
+    "back",
+    "three_quarter"
+  ],
+  "clip_presets": [
+    "none",
+    "rig_smoke_v1"
+  ],
+  "authoring_requirements": {
+    "kit_files": [
+      "catalog manifest",
+      "trusted procedural generator",
+      "region/UV templates embedded in generator"
+    ],
+    "humanoid_extra_files": [
+      "fixed bone coordinates and weight rules in rig.py/geometry.py",
+      "catalog topology_sha256",
+      "model_data.json per build"
+    ],
+    "hashes": "Built-in procedural sources are pinned by source_hashes; every build also hashes all runtime source. No external .blend file is needed for these eight kits.",
+    "charts": "Per face-corner local UVs; keep curved chart continuity. Tile grids are authored geometry with repeated per-cell UVs, never REPEAT the whole atlas. Character templates reserve padding between their internal islands as well as around the outer atlas rectangle.",
+    "region_identity": "Semantic face groups on immutable kit topology; never raw polygon indices in public API.",
+    "sockets": "Local frames denote a shared mating interface with identical basis at fit; flush mating transform is identity. Validate certified kit/socket pairs and dimensions from socket_types, scaled by equal positive uniform instance scales. Solve full child world matrix = parent_world * parent_socket * inverse(child_socket). This includes parent uniform scale; do not multiply child scale again. Convert world to local if parenting; the previous child placement is replaced.",
+    "texture_defaults": "Build initialization creates all atlas defaults once using versioned pattern/color-role/face-landmark definitions. place only references these job-local images and never resets pixels. paint_tile may run before or after place and override each tile at most once; unused tiles are not exported separately."
+  },
+  "validation": {
+    "phases": [
+      "strict_json",
+      "schema",
+      "plan_semantics",
+      "blender_preflight",
+      "pose_smoke",
+      "glb_postflight",
+      "target_engine_smoke"
+    ],
+    "semantic_checks": [
+      "at least one mesh instance; static prop_v1 contains no skinned kits",
+      "ids declared before use and unique",
+      "region belongs to referenced kit",
+      "slot and tile compatible with region",
+      "patterns compatible with tile",
+      "pixel marks within inner content rectangle",
+      "one paint per tile",
+      "attach sockets exist, type and dimensions match, equal uniform scales, no occupied sockets or graph cycles",
+      "no attach for skinned kit in v1",
+      "bind only supported topology, once; all character assets bound before export",
+      "asset_kind matches kits; one humanoid instance in character_v1",
+      "exactly one final export_glb; no commands after it"
+    ],
+    "required_glb_checks": [
+      "Khronos validator zero errors",
+      "no external buffer/image URI; PNG images embedded with bufferView",
+      "pixel sampler minFilter=9728 magFilter=9728 wrapS=33071 wrapT=33071",
+      "all referenced textures/materials present",
+      "for character: mesh node references skin, 20 expected joints, JOINTS_0/WEIGHTS_0 and inverse bind matrices",
+      "valid finite normalized weights, at most 4 influences; no hidden truncation by exporter",
+      "UV seam vertex duplicates carry identical weights"
+    ],
+    "initial_template_thresholds": {
+      "weight_sum_abs_error": 0.0001,
+      "rest_reconstruction_error_m": 1e-05,
+      "seam_gap_m": 1e-05,
+      "joint_edge_stretch_p99_max": 2,
+      "joint_edge_stretch_absolute_max": 3
+    },
+    "threshold_note": "Engineering starting points; calibrate deformation/collapse limits on the authored template, and use glTF Validator's own stricter format tolerances after export. Numerical checks do not replace visual review.",
+    "reproduction": "Pin recipe, catalog and asset hashes, seed, Blender build and exporter. Compare geometry/texture/rig content; byte-identical GLB is not promised."
+  },
+  "source_hashes": {
+    "geometry.py": "6220e4da796784a9b6247a9172609a7f07850778695b939bbc9524160acd3fe9",
+    "rig.py": "81ca1e4c95896b3ef7dd27d117bdee186ed2ff1853fda81a050247bb954ab2be",
+    "atlas.py": "6a9d369f892b9600c9641aa94d92d4b2c712d4c14f1118b8c724f5bd13475c88",
+    "materials.py": "3157cafd34db8e68e26457686a734e9f2071f1918d3caf3a48cdb7fc011b40bc"
+  },
+  "observation_policy": {
+    "snapshot": "final frozen scene, never an intermediate command state",
+    "publication": "immutable content revision; latest pointer commits only after GLB and all images pass checks",
+    "reads": "observe_asset resolves latest once; read_preview and inspect_object require that explicit revision",
+    "views": [
+      "beauty",
+      "clay",
+      "wireframe",
+      "object_id",
+      "uv_debug",
+      "atlas_uv",
+      "pose",
+      "contact_sheet"
+    ],
+    "failure": "previous successful revision is retained, with latest accepted build attempt status reported separately",
+    "external_edits": "External Blender UI/.blend edits are not watched; rebuild a recipe to publish a new observation."
+  }
+}

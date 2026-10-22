@@ -1,0 +1,153 @@
+{
+  "method": "build_asset",
+  "request_id": "house_demo_starter_v1",
+  "params": {
+    "schema_version": "0.2.0",
+    "catalog_version": "starter_v1",
+    "catalog_sha256": "f644e512118b8161f39851a96d85898eedda582b46dc450fdfdb08a3bf4d61aa",
+    "asset_id": "house_demo",
+    "asset_kind": "prop",
+    "seed": 42,
+    "texture_profile": "pixel_atlas_v1",
+    "ops": [
+      {
+        "op": "paint_tile",
+        "tile_id": "env_wall_cream",
+        "pattern": "plaster",
+        "palette": "pastel16"
+      },
+      {
+        "op": "paint_tile",
+        "tile_id": "env_roof_rust",
+        "pattern": "roof_shingles",
+        "palette": "pastel16"
+      },
+      {
+        "op": "paint_tile",
+        "tile_id": "env_wood_oak",
+        "pattern": "planks",
+        "palette": "pastel16"
+      },
+      {
+        "op": "place",
+        "id": "walls",
+        "kit_id": "house_shell_2m_v1",
+        "pos": [
+          0,
+          0,
+          0
+        ],
+        "rot": "yaw_0",
+        "scale": 1
+      },
+      {
+        "op": "place",
+        "id": "roof",
+        "kit_id": "roof_gable_35_v1",
+        "pos": [
+          0,
+          0,
+          0
+        ],
+        "rot": "yaw_0",
+        "scale": 1
+      },
+      {
+        "op": "attach",
+        "child": "roof",
+        "child_socket": "base",
+        "parent": "walls",
+        "parent_socket": "roof_mount",
+        "mate": "flush"
+      },
+      {
+        "op": "place",
+        "id": "door",
+        "kit_id": "door_roundtop_v1",
+        "pos": [
+          0,
+          0,
+          0
+        ],
+        "rot": "yaw_0",
+        "scale": 1
+      },
+      {
+        "op": "attach",
+        "child": "door",
+        "child_socket": "mount",
+        "parent": "walls",
+        "parent_socket": "door_mount",
+        "mate": "flush"
+      },
+      {
+        "op": "place",
+        "id": "window_l",
+        "kit_id": "window_square_v1",
+        "pos": [
+          0,
+          0,
+          0
+        ],
+        "rot": "yaw_0",
+        "scale": 1
+      },
+      {
+        "op": "attach",
+        "child": "window_l",
+        "child_socket": "mount",
+        "parent": "walls",
+        "parent_socket": "window_left",
+        "mate": "flush"
+      },
+      {
+        "op": "place",
+        "id": "window_r",
+        "kit_id": "window_square_v1",
+        "pos": [
+          0,
+          0,
+          0
+        ],
+        "rot": "yaw_0",
+        "scale": 1
+      },
+      {
+        "op": "attach",
+        "child": "window_r",
+        "child_socket": "mount",
+        "parent": "walls",
+        "parent_socket": "window_right",
+        "mate": "flush"
+      },
+      {
+        "op": "assign_slot",
+        "mesh": "roof",
+        "region": "roof_left",
+        "slot": "roof"
+      },
+      {
+        "op": "set_region_uv",
+        "mesh": "roof",
+        "region": "roof_left",
+        "tile_id": "env_roof_rust",
+        "orientation": 0
+      },
+      {
+        "op": "validate",
+        "profile": "prop_v1"
+      },
+      {
+        "op": "render_preview",
+        "camera": "three_quarter",
+        "pose": "rest",
+        "texture_view": "final"
+      },
+      {
+        "op": "export_glb",
+        "profile": "game_pixel_v1",
+        "clips": "none"
+      }
+    ]
+  }
+}
