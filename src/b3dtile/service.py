@@ -218,7 +218,9 @@ class AssetService:
         env["PYTHONUTF8"] = "1"
         with (stage / "worker.log").open("w", encoding="utf-8") as log:
             try:
-                completed = subprocess.run(cmd, stdout=log, stderr=subprocess.STDOUT, env=env,
+                # MCP owns stdin: inheriting its active protocol pipe can block
+                # Windows Python initialization before the worker starts.
+                completed = subprocess.run(cmd, stdin=subprocess.DEVNULL, stdout=log, stderr=subprocess.STDOUT, env=env,
                                            timeout=self.timeout, check=False, cwd=str(stage))
             except subprocess.TimeoutExpired as exc:
                 raise ContractError("E_BUILD_TIMEOUT", "Worker exceeded build timeout", seconds=self.timeout) from exc

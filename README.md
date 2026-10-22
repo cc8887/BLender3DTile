@@ -119,3 +119,7 @@ API 参数、组件目录、atlas 分区和扩展流程见 [API_AND_KITS.md](doc
 示例角色的 Khronos 报告保留一条 `NODE_SKINNED_MESH_NON_ROOT` 警告。glTF 蒙皮遵循关节变换，忽略网格节点自身变换，详见[官方规范](https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#joint-hierarchy)。固定导出器已将绑定形状变换烘焙进顶点；回归测试将平移、旋转和缩放后的 GLB 动画顶点与 Blender 实际求值的世界坐标逐帧比较，不仅检查字段是否存在。
 
 同一资产的并发构建由 `.build.lock` 拒绝。进程被强制终止后若留下锁，应先核对锁内 PID 已退出，再手工移除该单个锁文件；不要删除仍在工作的锁。
+
+## 模型隔离测试
+
+Luna、Terra、Sol、Astra 的统一房屋/僵尸 prompt、隔离执行器和结果评估见 [benchmarks/README.md](benchmarks/README.md)。每个模型的每项任务使用全新上下文与独立产物目录，只通过五个受限 MCP 工具操作。测试不会读取现成示例配方，也不会修改生产源码。

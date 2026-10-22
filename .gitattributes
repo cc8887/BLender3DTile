@@ -1,2 +1,2 @@
 # Catalog/source locks hash exact bytes; keep checkouts identical on every OS.
-* -text
+* -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
