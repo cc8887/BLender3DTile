@@ -2,9 +2,9 @@
   "method": "build_asset",
   "request_id": "house_demo_starter_v1",
   "params": {
-    "schema_version": "0.2.0",
+    "schema_version": "0.3.0",
     "catalog_version": "starter_v1",
-    "catalog_sha256": "f644e512118b8161f39851a96d85898eedda582b46dc450fdfdb08a3bf4d61aa",
+    "catalog_sha256": "388f8f7f9865e58d3014295be44773c7718eb6d54a5e92491ce8006f5fbb470a",
     "asset_id": "house_demo",
     "asset_kind": "prop",
     "seed": 42,

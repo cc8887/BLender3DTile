@@ -121,6 +121,7 @@ def validate_plan(recipe: dict, catalog: dict) -> dict:
     tiles = {x["id"]: x for x in catalog["tiles"]}
     objects, parents, occupied, bound, painted, assigned = {}, {}, set(), set(), set(), {}
     preview_count = 0
+    animated = {}
 
     def fail(code, message, index, **context):
         raise ContractError(code, message, op_index=index, **context)
@@ -149,13 +150,29 @@ def validate_plan(recipe: dict, catalog: dict) -> dict:
             for mark in op.get("marks", []):
                 if mark["x"] >= w - 2 * tile["padding_px"] or mark["y"] >= h - 2 * tile["padding_px"]:
                     fail("E_PIXEL_BOUNDS", "Pixel outside tile inner rectangle", index, tile_id=tile["id"])
-        elif kind in ("assign_slot", "set_region_uv"):
+        elif kind in ("assign_slot", "set_region_uv", "paint_vertex_color", "set_uv_animation"):
             placed = existing(op["mesh"], index)
             kit = kits[placed["kit_id"]]
             region = kit["regions"].get(op["region"])
             if region is None:
                 fail("E_REGION_UNKNOWN", "Region does not belong to this kit", index, object_id=op["mesh"], allowed=list(kit["regions"]))
             key = (op["mesh"], op["region"])
+            if kind == "paint_vertex_color":
+                continue
+            if key in animated:
+                fail("E_UV_ANIMATION_LOCKED", "Set slots and UVs before animation; one track per region", index)
+            if kind == "set_uv_animation":
+                preset = next(p for p in catalog["uv_animation_presets"] if p["id"] == op["preset"])
+                slot = assigned.get(key, region["default_slot"])
+                if slot != preset["slot"] or not set(preset["frames"]) <= set(slots[slot]["allowed_tiles"]):
+                    fail("E_UV_ANIMATION_SLOT", "Flipbook incompatible with region slot", index, required_slot=preset["slot"])
+                frame_tiles = [tiles[t] for t in preset["frames"]]
+                if len({(t["atlas_id"], *t["rect_px"][2:], t["padding_px"]) for t in frame_tiles}) != 1:
+                    fail("E_UV_ANIMATION_LAYOUT", "Frames require equal sizes/padding in one atlas", index)
+                animated[key] = op["preset"]
+                if len(animated) > catalog["uv_animation_policy"]["max_tracks"]:
+                    fail("E_UV_ANIMATION_BUDGET", "At most four animated regions", index)
+                continue
             if kind == "assign_slot":
                 if op["slot"] not in region["allowed_slots"]:
                     fail("E_SLOT_REGION", "Slot incompatible with region", index, allowed=region["allowed_slots"])
@@ -196,7 +213,7 @@ def validate_plan(recipe: dict, catalog: dict) -> dict:
         elif kind == "bind_humanoid":
             placed = existing(op["mesh"], index)
             kit = kits[placed["kit_id"]]
-            if kit.get("rig_preset") != op["preset"]:
+            if op["preset"] not in kit.get("rig_presets", [kit.get("rig_preset")]):
                 fail("E_RIG_KIT", "Rig preset requires a compatible humanoid kit", index)
             if op["mesh"] in bound:
                 fail("E_ALREADY_BOUND", "Object already bound", index)

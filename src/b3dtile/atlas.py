@@ -49,6 +49,8 @@ def _paint_content(catalog: dict, tile: dict, pattern: str, palette_id: str, see
     colors = _palette(catalog, palette_id)
     base_i, dark_i, light_i = _ROLES[palette_id][tile["slot"]]
     base, dark, light = (colors[base_i], colors[dark_i], colors[light_i])
+    if "base_color_index" in tile:
+        base = colors[tile["base_color_index"]]
     im = Image.new("RGB", (w, h), base)
     draw = ImageDraw.Draw(im)
     rng = random.Random(_tile_seed(seed, tile["id"]))

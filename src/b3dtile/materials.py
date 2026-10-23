@@ -124,7 +124,10 @@ class AtlasMaterials:
                 assigned.add(poly_index)
                 poly = mesh.polygons[poly_index]
                 actual_mat = mesh.materials[poly.material_index] if poly.material_index < len(mesh.materials) else None
-                if actual_mat != self.materials[atlas_id]:
+                texture = actual_mat.node_tree.nodes.get("AtlasTexture") if actual_mat and actual_mat.use_nodes else None
+                variant = actual_mat and (actual_mat.get("b3d_vertex_color") == "B3DColor" or actual_mat.get("b3d_uv_track") == instance.object_id + "." + region)
+                valid_material = (actual_mat == self.materials[atlas_id] or variant) and actual_mat.get("atlas_id") == atlas_id
+                if not valid_material or texture is None or texture.image != self.images[atlas_id] or texture.interpolation != "Closest":
                     errors.append({"code": "E_ATLAS_MATERIAL", "object_id": instance.object_id, "region": region, "polygon": poly_index})
                 for loop in poly.loop_indices:
                     u, v = mesh.uv_layers.active.data[loop].uv

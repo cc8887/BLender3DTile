@@ -77,6 +77,8 @@ def build(request, output: Path, revision: str):
     from .rig import bind_humanoid, create_smoke_animation, set_pose, validate_rig
     from .glb import export_glb
     from .observation import capture_observation
+    from .vertex_colors import paint_vertex_color, ensure_materials, validate_vertex_colors
+    from .uv_animation import configure as configure_uv_animation, public_tracks
 
     if tuple(bpy.app.version) != (4, 5, 14):
         raise ContractError("E_BACKEND_VERSION", "This catalog requires Blender/bpy 4.5.14", actual=bpy.app.version_string)
@@ -110,7 +112,9 @@ def build(request, output: Path, revision: str):
             elif kind == "set_region_uv":
                 materials.set_region_uv(instances[op["mesh"]], op["region"], op["tile_id"], op["orientation"])
             elif kind == "bind_humanoid":
-                bind_humanoid(instances[op["mesh"]], op["preset"], catalog)
+                bind_humanoid(instances[op["mesh"]], op["preset"], catalog, op.get("weight_preset", "anatomical_smooth_v1"))
+            elif kind == "paint_vertex_color":
+                paint_vertex_color(instances[op["mesh"]], op["region"], op["style"], op["palette"], op["color_a"], op["color_b"], catalog)
             # paint_tile is initialized deterministically before placement;
             # validate/render_preview declare checks/views of the final frozen scene.
         except Exception as exc:
@@ -118,17 +122,23 @@ def build(request, output: Path, revision: str):
                 raise
             raise ContractError("E_OPERATION", str(exc), op_index=index, op=op["op"]) from exc
 
+    for op in recipe["ops"]:
+        if op["op"] == "set_uv_animation":
+            configure_uv_animation(instances[op["mesh"]], op["region"], op["preset"], op["fps"], catalog, materials)
+    for inst in instances.values():
+        ensure_materials(inst)
     bpy.context.view_layer.update()
-    validation = {"geometry": _geometry_checks(instances), "uv": {}, "rig": {}}
+    validation = {"geometry": _geometry_checks(instances), "uv": {}, "rig": {}, "vertex_colors": {}}
     for oid, inst in instances.items():
         problems = materials.diagnostics(inst)
         validation["uv"][oid] = {"ok": not problems, "errors": problems}
+        validation["vertex_colors"][oid] = validate_vertex_colors(inst)
         if inst.rig is not None:
             validation["rig"][oid] = validate_rig(inst)
     failures = []
     if not validation["geometry"]["ok"]:
         failures.extend(validation["geometry"]["errors"])
-    for group in ("uv", "rig"):
+    for group in ("uv", "rig", "vertex_colors"):
         for oid, report in validation[group].items():
             if not report["ok"]:
                 failures.append({"object_id": oid, "category": group, "report": report})
@@ -162,6 +172,7 @@ def build(request, output: Path, revision: str):
     bpy.ops.wm.save_as_mainfile(filepath=str(output / "debug.blend"))
     observation["diagnostics"] = validation
     observation["glb"] = glb_path.name
+    observation["uv_animations"] = public_tracks(instances)
     write_json(output / "observation.json", observation)
     return {"ok": True, "runtime": {"blender": bpy.app.version_string, "python": sys.version.split()[0]}, "validation": validation}
 

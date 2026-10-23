@@ -349,18 +349,19 @@ class AssetService:
             after = {x["id"]: x for x in result.get("objects", [])}
             changes = []
             for oid in sorted(before.keys() & after.keys()):
-                fields = [field for field in ("kit_id", "world_matrix", "geometry_sha256", "appearance_sha256", "regions", "bone_count") if before[oid].get(field) != after[oid].get(field)]
+                fields = [field for field in ("kit_id", "world_matrix", "geometry_sha256", "appearance_sha256", "regions", "bone_count", "rig_preset", "weight_preset", "weight_table_sha256") if before[oid].get(field) != after[oid].get(field)]
                 if fields:
                     changes.append({"object_id": oid, "fields": fields})
             result["changes"] = {"from_revision": known_revision, "added": sorted(after.keys() - before.keys()), "removed": sorted(before.keys() - after.keys()), "changed": changes}
         if detail == "summary":
-            result["objects"] = [{key: obj[key] for key in ("id", "kit_id", "bbox", "vertices", "triangles", "bone_count", "id_color_rgb") if key in obj} for obj in result.get("objects", [])]
+            result["objects"] = [{key: obj[key] for key in ("id", "kit_id", "bbox", "vertices", "triangles", "bone_count", "id_color_rgb", "rig_preset", "weight_preset", "weight_table_sha256", "vertex_colors", "uv_animations") if key in obj} for obj in result.get("objects", [])]
             result["images"] = [{k: v for k, v in image.items() if k not in ("objects", "camera_matrix", "camera_world_matrix", "projection_matrix")} for image in result.get("images", [])]
             result["artifacts"] = {aid: item for aid, item in manifest["artifacts"].items() if item["mime_type"] in ("image/png", "model/gltf-binary")}
             reports = result.get("diagnostics", {})
             result["diagnostics"] = {"geometry_ok": reports.get("geometry", {}).get("ok"),
                                      "uv_ok": all(v.get("ok") for v in reports.get("uv", {}).values()),
                                      "rig_ok": all(v.get("ok") for v in reports.get("rig", {}).values()),
+                                     "vertex_colors_ok": all(v.get("ok") for v in reports.get("vertex_colors", {}).values()),
                                      "glb_ok": reports.get("glb", {}).get("ok"),
                                      "khronos": reports.get("khronos", {})}
         return result

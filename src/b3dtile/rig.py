@@ -1,8 +1,11 @@
 """Fixed humanoid skeleton, deterministic weights and pose regression checks."""
 from __future__ import annotations
 import math
+import hashlib
+import json
 
 from .geometry import humanoid_bones, topology_signature, _segment_distance
+from .rig_presets import RIG_IDS, WEIGHT_IDS, skeleton, remap_weights
 
 
 def _weights(co,bones):
@@ -29,9 +32,9 @@ def _weights(co,bones):
     return {n:w/total for n,w in vals.items()}
 
 
-def bind_humanoid(instance,preset,catalog)->dict:
+def bind_humanoid(instance,preset,catalog,weight_preset="anatomical_smooth_v1")->dict:
     import bpy
-    if instance.kit_id!="humanoid_round_v1" or preset!="humanoid_20_v1":
+    if instance.kit_id!="humanoid_round_v1" or preset not in RIG_IDS or weight_preset not in WEIGHT_IDS:
         raise ValueError("E_RIG_INCOMPATIBLE: fixed template required")
     if instance.rig is not None: raise ValueError("E_ALREADY_BOUND")
     if topology_signature(instance.mesh.data)!=instance.meta["topology_sha256"]:
@@ -39,7 +42,7 @@ def bind_humanoid(instance,preset,catalog)->dict:
     kit_spec=next(k for k in catalog["kits"] if k["id"]==instance.kit_id)
     if kit_spec.get("topology_sha256") and instance.meta["topology_sha256"]!=kit_spec["topology_sha256"]:
         raise ValueError("E_TOPOLOGY_CATALOG_MISMATCH")
-    bones=humanoid_bones()
+    bones=skeleton(preset)
     spec=next(p for p in catalog["rig_presets"] if p["id"]==preset)
     if set(bones)!={b["name"] for b in spec["bones"]}: raise ValueError("E_RIG_CATALOG_MISMATCH")
     arm_data=bpy.data.armatures.new(instance.object_id+"_skeleton")
@@ -57,10 +60,10 @@ def bind_humanoid(instance,preset,catalog)->dict:
     groups={n:instance.mesh.vertex_groups.new(name=n) for n in bones}
     table=[]
     for v in instance.mesh.data.vertices:
-        weights=_weights(v.co,bones);table.append(weights)
+        weights=remap_weights(_weights(v.co,humanoid_bones()),preset,weight_preset);table.append(weights)
         for name,value in weights.items():
             if value>1e-9: groups[name].add([v.index],value,"REPLACE")
-    modifier=instance.mesh.modifiers.new("humanoid_20_v1 linear skin","ARMATURE")
+    modifier=instance.mesh.modifiers.new(preset+" linear skin","ARMATURE")
     modifier.object=arm;modifier.use_deform_preserve_volume=False
     # glTF resolves a skinned mesh through its ancestor armature. Keeping the
     # armature and mesh as siblings forces exporter heuristics and can select
@@ -70,6 +73,9 @@ def bind_humanoid(instance,preset,catalog)->dict:
     instance.mesh.parent=arm
     instance.mesh.matrix_world=mesh_world
     instance.rig=arm;instance.meta["weight_table"]=table;instance.meta["rig_preset"]=preset
+    instance.meta["weight_preset"]=weight_preset
+    instance.meta["weight_table_sha256"]=hashlib.sha256(json.dumps(table,sort_keys=True,separators=(",", ":")).encode()).hexdigest()
+    instance.meta["bone_specs"]=bones
     arm.show_in_front=True
     bpy.context.view_layer.update()
     return {"preset":preset,"bones":len(bones),"vertices":len(table),"max_influences":max(map(len,table))}

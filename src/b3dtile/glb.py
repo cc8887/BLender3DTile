@@ -12,6 +12,7 @@ import json
 import math
 from pathlib import Path
 import struct
+from .rig_presets import RIG_IDS, skeleton
 
 
 _JSON = 0x4E4F534A
@@ -337,6 +338,11 @@ def inspect_glb(path: Path, require_skin: bool = False, require_animation: bool 
                     uvs = reader.accessor(attributes["TEXCOORD_0"])
                     if len(uvs) != len(positions) or any(len(uv) != 2 or not all(math.isfinite(v) and 0 <= v <= 1 for v in uv) for uv in uvs):
                         error("E_GLB_UV_INVALID", mesh=mesh_index, primitive=primitive_index)
+                if "COLOR_0" in attributes:
+                    colors = reader.accessor(attributes["COLOR_0"])
+                    metrics["colored_primitives"] = metrics.get("colored_primitives", 0) + 1
+                    if len(colors) != len(positions) or any(len(c) not in (3, 4) or not all(math.isfinite(v) and 0 <= v <= 1 for v in c) for c in colors):
+                        error("E_GLB_VERTEX_COLOR", mesh=mesh_index, primitive=primitive_index)
                 if primitive.get("mode", 4) != 4:
                     error("E_GLB_NOT_TRIANGLES", mesh=mesh_index, primitive=primitive_index)
                 if "indices" in primitive:
@@ -373,7 +379,7 @@ def inspect_glb(path: Path, require_skin: bool = False, require_animation: bool 
             skin = _index(skins, node["skin"], "node skin")
             joint_nodes = skin["joints"]
             names = [_index(nodes, joint, "skin joint").get("name", "") for joint in joint_nodes]
-            if len(joint_nodes) != 20 or len(set(joint_nodes)) != 20 or set(names) != _BONE_NAMES:
+            if len(joint_nodes) != len(set(joint_nodes)) or len(names) != len(set(names)) or not any(set(names) == set(skeleton(preset)) for preset in RIG_IDS):
                 error("E_GLB_JOINT_SET", skin=node["skin"], count=len(joint_nodes), names=names)
             if "inverseBindMatrices" not in skin:
                 error("E_GLB_INVERSE_BIND_MISSING", skin=node["skin"])
@@ -450,8 +456,24 @@ def inspect_glb(path: Path, require_skin: bool = False, require_animation: bool 
         for animation_index, animation in enumerate(doc.get("animations", [])):
             channels = []
             key_times = set()
+            pointer_channels = 0
+            pointers = set()
             for channel in animation.get("channels", []):
                 target = channel["target"]
+                if target.get("path") == "pointer":
+                    from .uv_animation import validate_pointer
+                    pointer = target.get("extensions", {}).get("KHR_animation_pointer", {}).get("pointer")
+                    if pointer in pointers:
+                        error("E_GLB_DUPLICATE_POINTER")
+                    pointers.add(pointer)
+                    sampler = _index(animation["samplers"], channel["sampler"], "animation sampler")
+                    try:
+                        metrics["uv_animation_keys"] = metrics.get("uv_animation_keys", 0) + validate_pointer(doc, reader, channel, sampler)
+                        pointer_channels += 1
+                        metrics["uv_animation_channels"] = metrics.get("uv_animation_channels", 0) + 1
+                    except (ValueError, KeyError, IndexError, TypeError, ZeroDivisionError) as exc:
+                        error("E_GLB_UV_ANIMATION", detail=str(exc))
+                    continue
                 target_node = target["node"]
                 _index(nodes, target_node, "animation target")
                 path_name = target["path"]
@@ -470,7 +492,8 @@ def inspect_glb(path: Path, require_skin: bool = False, require_animation: bool 
                 key_times.update(key[0] for key in keys)
                 channels.append((target_node, path_name, keys, values, sampler.get("interpolation", "LINEAR")))
             if not channels:
-                error("E_GLB_EMPTY_ANIMATION", animation=animation_index)
+                if not pointer_channels:
+                    error("E_GLB_EMPTY_ANIMATION", animation=animation_index)
                 continue
             times = sorted(key_times)
             samples = sorted(set(times + [(a+b)/2 for a, b in zip(times, times[1:])]))
@@ -531,12 +554,17 @@ def export_glb(instances: dict, filepath: Path, include_animation: bool) -> dict
         export_rest_position_armature=True, export_reset_pose_bones=True,
         export_force_sampling=True, export_optimize_animation_size=False,
         export_cameras=False, export_lights=False,
+        export_vertex_color="ACTIVE", export_all_vertex_colors=False, export_extras=True,
     )
     if "FINISHED" not in result:
         raise RuntimeError(f"E_EXPORT_FAILED: {result}")
     document, binary = _read_glb(filepath)
     for sampler in document.get("samplers", []):
         sampler.update(minFilter=9728, magFilter=9728, wrapS=33071, wrapT=33071)
+    from .uv_animation import append_to_glb
+    binary, timeline = append_to_glb(document, binary, instances)
+    if timeline["tracks"]:
+        (filepath.parent / "uv_animation.json").write_text(json.dumps(timeline, ensure_ascii=False, indent=2), encoding="utf-8")
     _write_glb(filepath, document, binary)
     report = inspect_glb(filepath, require_skin=any(i.rig is not None for i in instances.values()), require_animation=include_animation)
     report["path"] = str(filepath)

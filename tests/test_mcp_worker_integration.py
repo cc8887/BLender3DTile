@@ -35,7 +35,7 @@ def test_real_audited_mcp_build_finishes_while_protocol_stdin_remains_open(tmp_p
         pytest.skip("Requires the official glTF validator installed by bootstrap")
     output = tmp_path / "assets"
     audit_path = tmp_path / "audit.jsonl"
-    request = json.loads((ROOT / "examples/house.request.json").read_text(encoding="utf-8"))
+    request = json.loads((ROOT / "examples/features_house.request.json").read_text(encoding="utf-8"))
     request["params"]["asset_id"] = "mcp_integration_house"
 
     def text_result(result):
@@ -61,9 +61,16 @@ def test_real_audited_mcp_build_finishes_while_protocol_stdin_remains_open(tmp_p
                 glb_path = directory / (request["params"]["asset_id"] + ".glb")
                 assert inspect_glb(glb_path)["ok"]
                 assert built["validation"]["khronos"]["ok"]
+                assert built["validation"]["glb"]["metrics"]["colored_primitives"] >= 1
+                assert built["validation"]["glb"]["metrics"]["uv_animation_channels"] == 1
                 observed = text_result(await session.call_tool("observe_asset", {"asset_id": request["params"]["asset_id"]}))
                 assert observed["revision"] == built["revision"]
-                image = next(item for item in observed["images"] if item["path"] == observed["contact_sheet"])
+                assert any(item["mode"] == "vertex_color" for item in observed["images"])
+                frames = [item for item in observed["images"] if "time_seconds" in item]
+                assert [item["time_seconds"] for item in frames] == [0., .5, 1., 1.5]
+                assert len({item["sha256"] for item in frames}) >= 3
+                assert all(item["revision"] == built["revision"] for item in frames)
+                image = next(item for item in observed["images"] if item["path"] == "observations/uv_animation_strip.png")
                 preview = await session.call_tool("read_preview", {
                     "asset_id": request["params"]["asset_id"], "revision": observed["revision"], "artifact_id": image["artifact_id"]})
                 assert not preview.isError and isinstance(preview.content[0], ImageContent)

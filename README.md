@@ -96,6 +96,8 @@ worker.log
 
 API 参数、组件目录、atlas 分区和扩展流程见 [API_AND_KITS.md](docs/API_AND_KITS.md)。
 
+配方 `0.3.0` 已增加区域顶点色、atlas 逐帧 UV 动画、20/16/12 骨人形及两种权重预设。接口、GLB 播放器要求、Crocotile/Rigify 来源接入和离线 GLB 提取工具见 [FEATURES_AND_SOURCES.md](docs/FEATURES_AND_SOURCES.md)。可运行 `examples/features_*.request.json` 查看示例；顶点色单独诊断图和 UV 时间序列会进入版本化观察包。
+
 - 核心模块 `contracts.py`、`service.py`、`atlas.py` 不依赖 Blender 状态；Blender 操作集中于后端模块。
 - 配方、kit、tile、region、slot、socket、pose、camera 都由 `schemas/request.schema.json` 和 `catalog/starter_v1.catalog.json`约束。
 - 坐标：米、右手系、+Z 向上、-Y 为正面。旋转首批为四个 yaw；缩放为统一正缩放 0.5/1/2。
@@ -103,7 +105,7 @@ API 参数、组件目录、atlas 分区和扩展流程见 [API_AND_KITS.md](doc
 - atlas 矩形原点在左上，UV 转换内部完成。重复使用 tile 合法；跨区/错槽不合法。
 - 默认材质在构建开始初始化一次，放置组件不会覆盖已画图案。
 - 角色绑定前校验目录中锁定的拓扑签名。固定权重规则生成顶点 ID 权重表，最多 4 个影响；不使用自动热力权重。
-- 调整受信组件/权重/atlas实现后，需要审阅并运行 `tools/sync_contract.py` 更新目录哈希和两份示例；现有旧配方需重新取得目录。
+- 调整受信组件/权重/atlas实现后，需要审阅并运行 `tools/sync_contract.py` 更新目录哈希和所有示例；现有旧配方需重新取得目录。
 - `export_glb` 是唯一资产导出指令，必须恰好一次且在末尾。执行前后都验证，辅助相机/灯光不会混入 GLB。
 
 ```powershell

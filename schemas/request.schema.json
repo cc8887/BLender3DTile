@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:blender3dtile:request:0.2.0",
+  "$id": "urn:blender3dtile:request:0.3.0",
   "title": "Blender3DTile constrained construction and revision-bound observation API",
   "description": "Two public transports: get_catalog and build_asset. Recipe commands share these definitions for a future thin MCP adapter. No Python, paths, URLs, raw vertices, raw UVs, modifiers, or free bone transforms.",
   "oneOf": [
@@ -49,7 +49,9 @@
         "char_face_sleepy",
         "char_shirt_plum",
         "char_jeans_indigo",
-        "char_shoes_dark"
+        "char_shoes_dark",
+        "env_glass_amber",
+        "env_glass_dark"
       ]
     },
     "region_id": {
@@ -348,8 +350,17 @@
         },
         "preset": {
           "enum": [
-            "humanoid_20_v1"
+            "humanoid_20_v1",
+            "humanoid_compact_16_v1",
+            "humanoid_basic_12_v1"
           ]
+        },
+        "weight_preset": {
+          "enum": [
+            "anatomical_smooth_v1",
+            "anatomical_crisp_v1"
+          ],
+          "default": "anatomical_smooth_v1"
         }
       },
       "required": [
@@ -467,6 +478,12 @@
         },
         {
           "$ref": "#/$defs/export_glb"
+        },
+        {
+          "$ref": "#/$defs/paint_vertex_color"
+        },
+        {
+          "$ref": "#/$defs/set_uv_animation"
         }
       ]
     },
@@ -475,13 +492,13 @@
       "additionalProperties": false,
       "properties": {
         "schema_version": {
-          "const": "0.2.0"
+          "const": "0.3.0"
         },
         "catalog_version": {
           "const": "starter_v1"
         },
         "catalog_sha256": {
-          "const": "f644e512118b8161f39851a96d85898eedda582b46dc450fdfdb08a3bf4d61aa"
+          "const": "388f8f7f9865e58d3014295be44773c7718eb6d54a5e92491ce8006f5fbb470a"
         },
         "asset_id": {
           "$ref": "#/$defs/id"
@@ -746,6 +763,88 @@
         "method",
         "request_id",
         "params"
+      ]
+    },
+    "paint_vertex_color": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "op": {
+          "const": "paint_vertex_color"
+        },
+        "mesh": {
+          "$ref": "#/$defs/id"
+        },
+        "region": {
+          "$ref": "#/$defs/region_id"
+        },
+        "style": {
+          "enum": [
+            "solid",
+            "height_gradient"
+          ]
+        },
+        "palette": {
+          "enum": [
+            "pastel16",
+            "zombie16"
+          ]
+        },
+        "color_a": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 15
+        },
+        "color_b": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 15
+        }
+      },
+      "required": [
+        "op",
+        "mesh",
+        "region",
+        "style",
+        "palette",
+        "color_a",
+        "color_b"
+      ]
+    },
+    "set_uv_animation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "op": {
+          "const": "set_uv_animation"
+        },
+        "mesh": {
+          "$ref": "#/$defs/id"
+        },
+        "region": {
+          "$ref": "#/$defs/region_id"
+        },
+        "preset": {
+          "enum": [
+            "signal_blink_v1",
+            "signal_cycle_v1"
+          ]
+        },
+        "fps": {
+          "enum": [
+            1,
+            2,
+            4,
+            8
+          ]
+        }
+      },
+      "required": [
+        "op",
+        "mesh",
+        "region",
+        "preset",
+        "fps"
       ]
     }
   }

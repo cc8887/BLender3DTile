@@ -115,6 +115,8 @@ def _fingerprints(instance, texture_hashes: dict | None = None) -> dict:
         "materials": materials,
         "region_slots": instance.region_slots,
         "region_tiles": instance.region_tiles,
+        "vertex_colors": {a.name: [list(d.color) for d in a.data] for a in mesh.color_attributes},
+        "uv_animations": instance.meta.get("uv_animations", {}),
     }
     return {"geometry_sha256": digest_json(geometry), "appearance_sha256": digest_json(appearance)}
 
@@ -190,6 +192,8 @@ def _contact_sheet(images: list[dict], output_dir: Path, revision: str, filename
             top = y + (cell_width - thumb.height) // 2
             canvas.paste(thumb, (left, top))
         title = f"{entry.get('mode', 'atlas')} | {entry.get('camera', 'UV')} | {entry.get('pose', 'rest')}"
+        if "time_seconds" in entry:
+            title = f"UV t={entry['time_seconds']:.3f}s | {entry.get('camera')}"
         draw.text((x + 8, y + cell_width + 5), title, font=small, fill="#ecf0f6")
         placements.append({"image": entry["path"], "rect_px": [x, y, cell_width, cell_width + label_height],
                            "rect_format": "x_y_width_height"})
@@ -358,6 +362,12 @@ def capture_observation(instances: dict, recipe: dict, catalog: dict, output_dir
                 "polygons": len(mesh.polygons),
                 "regions": regions,
                 "bone_count": len(instance.rig.data.bones) if instance.rig else 0,
+                "rig_preset": instance.meta.get("rig_preset"),
+                "weight_preset": instance.meta.get("weight_preset"),
+                "weight_table_sha256": instance.meta.get("weight_table_sha256"),
+                "vertex_colors": instance.meta.get("vertex_colors", {}),
+                "uv_animations": [{k: v for k, v in t.items() if k not in ("loop_indices", "base_uv_blender")}
+                                  for t in instance.meta.get("uv_animations", {}).values()],
                 "bones": [{"name": bone.name, "parent": bone.parent.name if bone.parent else None}
                           for bone in instance.rig.data.bones] if instance.rig else [],
                 "id_color_rgb": list(colors[object_id]),
@@ -434,10 +444,21 @@ def capture_observation(instances: dict, recipe: dict, catalog: dict, output_dir
         wireframe.node_tree.links.new(wire_mix.outputs[0], wire_shader.inputs["Base Color"])
         auxiliary_materials.append(wireframe)
         labels = {}
+        color_views = {}
         for object_id, color in colors.items():
             labels[object_id] = _make_material(bpy, f"__observation_id_{object_id}",
                                                tuple(_linear(c) for c in color), emission=True)
             auxiliary_materials.append(labels[object_id])
+            if instances[object_id].meta.get("vertex_colors"):
+                material = _make_material(bpy, "__observation_color_" + object_id, (1, 1, 1), emission=True)
+                vertex = material.node_tree.nodes.new("ShaderNodeVertexColor")
+                vertex.layer_name = "B3DColor"
+                shader = next(n for n in material.node_tree.nodes if n.type == "EMISSION")
+                material.node_tree.links.new(vertex.outputs["Color"], shader.inputs["Color"])
+            else:
+                material = _make_material(bpy, "__observation_color_" + object_id, (1, 1, 1), emission=True)
+            color_views[object_id] = material
+            auxiliary_materials.append(material)
 
         def restore_materials():
             for object_id, instance in instances.items():
@@ -452,11 +473,11 @@ def capture_observation(instances: dict, recipe: dict, catalog: dict, output_dir
             restore_materials()
             for node, original in material_nodes:
                 node.image = original
-            if mode in ("clay", "wireframe", "object_id"):
+            if mode in ("clay", "wireframe", "object_id", "vertex_color"):
                 for object_id, instance in instances.items():
                     mesh = instance.mesh.data
                     mesh.materials.clear()
-                    material = clay if mode == "clay" else wireframe if mode == "wireframe" else labels[object_id]
+                    material = clay if mode == "clay" else wireframe if mode == "wireframe" else color_views[object_id] if mode == "vertex_color" else labels[object_id]
                     mesh.materials.append(material)
                     for polygon in mesh.polygons:
                         polygon.material_index = 0
@@ -481,14 +502,17 @@ def capture_observation(instances: dict, recipe: dict, catalog: dict, output_dir
             camera_data.ortho_scale = max(span_x, span_y, 0.1) * 1.22
             bpy.context.view_layer.update()
 
-        def render(camera_name, pose, mode):
+        def render(camera_name, pose, mode, time_seconds=None):
+            from .uv_animation import apply_time
+            apply_time(instances, time_seconds or 0.)
             pose_all(pose)
             set_material_mode(mode)
             aim(camera_name)
             black = mode == "object_id"
             world.node_tree.nodes["Background"].inputs["Color"].default_value = ((0, 0, 0, 1) if black else (0.18, 0.22, 0.28, 1))
             scene.cycles.use_denoising = not black
-            path = output_dir / "observations" / f"{mode}_{camera_name}_{pose}.png"
+            suffix = "" if time_seconds is None else f"_uv_time_{time_seconds:.6f}"
+            path = output_dir / "observations" / f"{mode}_{camera_name}_{pose}{suffix}.png"
             scene.render.filepath = str(path)
             bpy.ops.render.render(write_still=True)
             projected = {}
@@ -507,6 +531,10 @@ def capture_observation(instances: dict, recipe: dict, catalog: dict, output_dir
                                  mode=mode, objects=projected,
                                  camera_world_matrix=[list(row) for row in camera.matrix_world],
                                  orthographic_scale=float(camera_data.ortho_scale))
+            if time_seconds is not None:
+                from .uv_animation import frame_index, public_tracks
+                entry["time_seconds"] = time_seconds
+                entry["uv_frames"] = {track["id"]: frame_index(track, time_seconds) for track in public_tracks(instances)}
             images.append(entry)
             return entry
 
@@ -538,6 +566,8 @@ def capture_observation(instances: dict, recipe: dict, catalog: dict, output_dir
         render("three_quarter", "rest", "wireframe")
         render("three_quarter", "rest", "object_id")
         render("three_quarter", "rest", "uv_debug")
+        if any(i.meta.get("vertex_colors") for i in instances.values()):
+            render("three_quarter", "rest", "vertex_color")
         for pose in pose_names[1:]:
             render("front", pose, "beauty")
         requested = params.get("ops", [])
@@ -548,6 +578,14 @@ def capture_observation(instances: dict, recipe: dict, catalog: dict, output_dir
             if not any(i["camera"] == op["camera"] and i["pose"] == op["pose"] and i["mode"] == mode for i in images):
                 render(op["camera"], op["pose"], mode)
         images.extend(atlas_images)
+        from .uv_animation import public_tracks, apply_time
+        tracks = public_tracks(instances)
+        animation_images = []
+        for seconds in sorted({i / t["fps"] for t in tracks for i in range(len(t["frames"]))}):
+            animation_images.append(render("three_quarter", "rest", "beauty", seconds))
+        apply_time(instances, 0.)
+        if animation_images:
+            images.append(_contact_sheet(animation_images, output_dir, revision, "uv_animation_strip.png", columns=4))
         contact = _contact_sheet(images, output_dir, revision, "contact_sheet.png")
         images.append(contact)
         pose_images = [i for i in images if i.get("mode") == "beauty" and i.get("camera") == "front"]
@@ -580,6 +618,8 @@ def capture_observation(instances: dict, recipe: dict, catalog: dict, output_dir
         (output_dir / "observation.json").write_text(json.dumps(snapshot, ensure_ascii=False, indent=2), encoding="utf-8")
         return snapshot
     finally:
+        from .uv_animation import apply_time
+        apply_time(instances, 0.)
         for node, original in material_nodes:
             node.image = original
         for object_id, instance in instances.items():

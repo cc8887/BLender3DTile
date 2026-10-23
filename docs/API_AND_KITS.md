@@ -1,6 +1,6 @@
 # API、组件与贴图开发约定
 
-本文件描述当前已实现的 `schema_version=0.2.0`、`catalog_version=starter_v1`。字段和枚举的权威来源是 [request.schema.json](../schemas/request.schema.json) 与 [starter_v1.catalog.json](../catalog/starter_v1.catalog.json)。Agent 开始工作时调用 `get_catalog`，取得当前 Schema 和 `catalog_sha256`，不要从旧聊天复制内容锁。
+本文件描述当前已实现的 `schema_version=0.3.0`、`catalog_version=starter_v1`。字段和枚举的权威来源是 [request.schema.json](../schemas/request.schema.json) 与 [starter_v1.catalog.json](../catalog/starter_v1.catalog.json)。Agent 开始工作时调用 `get_catalog`，取得当前 Schema 和 `catalog_sha256`，不要从旧聊天复制内容锁。
 
 运行基线为 Python 3.11、Blender/`bpy` 4.5.14。默认构建使用独立 Python 子进程中的 `bpy`；无需启动 Blender 窗口。Kit 由受信代码生成，当前没有从任意 `.blend`、用户脚本或外部网格加载新 kit 的公共接口。
 
@@ -33,7 +33,9 @@ ID 格式为 `[a-z][a-z0-9_]{0,47}`；revision 为 16 位小写十六进制字�
 | `assign_slot` | `mesh, region, slot` | 仅允许区域声明的槽位，同时重置为该槽位的默认 tile 和 0° UV 朝向 |
 | `set_region_uv` | `mesh, region, tile_id, orientation` | 将预制 chart 映射到兼容 tile；不接受浮点 UV 或原始面索引 |
 | `paint_tile` | `tile_id, pattern, palette`；可选 `marks` | 重绘共享 tile；每 tile 每配方最多一次；所有使用者共享效果 |
-| `bind_humanoid` | `mesh, preset` | `preset="humanoid_20_v1"`；只接受兼容的人形 kit，每实例绑定一次 |
+| `paint_vertex_color` | `mesh, region, style, palette, color_a, color_b` | 区域纯色或局部 Z 高度渐变；调色板索引 0–15，线性顶点色乘以 atlas |
+| `set_uv_animation` | `mesh, region, preset, fps` | `signal_blink_v1/signal_cycle_v1`，glass 槽；fps=1/2/4/8，每区域一条、每资产最多四条 |
+| `bind_humanoid` | `mesh, preset`；可选 `weight_preset` | 20/16/12 骨预设；smooth/crisp 权重，默认 smooth；只接受兼容的人形 kit，每实例绑定一次 |
 | `validate` | `profile` | `prop_v1` 或 `character_v1`，必须匹配资产类型；声明最终场景检查 |
 | `render_preview` | `camera, pose, texture_view` | 声明最终场景的额外图片；最多 12 条；不捕获指令执行中间态 |
 | `export_glb` | `profile, clips` | `profile="game_pixel_v1"`，`clips="none"` 或 `"rig_smoke_v1"`；恰好一次且必须最后执行 |
@@ -44,6 +46,7 @@ ID 格式为 `[a-z][a-z0-9_]{0,47}`；revision 为 16 位小写十六进制字�
 - `rot` 仅允许 `yaw_0/90/180/270`；`scale` 为统一正缩放 `0.5/1/2`。斜屋顶和坡道使用真实斜面几何。
 - 对象必须先 `place` 再引用。插座只支持静态 kit；双方缩放一致、类型与认证组合匹配，插座不能重复占用，连接不能成环，child 不能二次连接。
 - 静态区域允许 `orientation=0/90/180/270`，角色区域只允许 `0`。先改变槽位，再选择该槽位兼容的 tile。
+- UV 动画最后设置，重置该区域到预设首帧与 0° 朝向；之后禁止覆盖其槽位/UV。`export_glb.clips` 只控制骨骼测试动画，UV 时间线独立写入 GLB。相关格式与播放器要求见 [FEATURES_AND_SOURCES.md](FEATURES_AND_SOURCES.md)。
 - `paint_tile` 在构建初始化时统一应用，位于 `place` 前后效果相同；`place` 不会覆盖绘画结果。
 - `camera` 为 `front/side/back/three_quarter`；`pose` 为 `rest/arms_raise_90/arms_raise_120/elbows_bend_90`；`texture_view` 为 `final/uv_debug`。非静止姿势和测试动画要求已绑定角色。
 - `prop` 不含人形 kit；`character` 恰好包含一个人形，并在导出前绑定。当前角色导出检查要求所有导出网格带 skin，因此角色配方应只放置该人形；静态附件与角色混合导出尚未作为支持路径。
@@ -77,11 +80,11 @@ ID 格式为 `[a-z][a-z0-9_]{0,47}`；revision 为 16 位小写十六进制字�
 
 角色区域实际名称采用 `upper_arm_l`、`forearm_r`、`thigh_l` 等后缀，完整枚举以 Catalog 为准。默认脸对应 `face` 槽；头、颈、前臂、手对应 `skin`；躯干及上臂对应 `shirt`；骨盆和腿对应 `jeans`；脚对应 `shoes`。只有上臂允许在 `skin` 和 `shirt` 两槽之间切换。
 
-`humanoid_20_v1` 包含根骨、骨盆、脊柱、胸、颈、头，以及左右锁骨、上臂、前臂、手、大腿、小腿、脚。受信解剖包络规则确定性生成归一化顶点权重，每顶点最多 4 个影响；绑定前检查拓扑 SHA-256。权重表会写入 `model_data.json`，当前没有接受用户骨架或自由权重的接口。
+`humanoid_20_v1` 包含根骨、骨盆、脊柱、胸、颈、头，以及左右锁骨、上臂、前臂、手、大腿、小腿、脚。另有 `humanoid_compact_16_v1` 和 `humanoid_basic_12_v1`，均为项目自定义的人形预设，匹配同一固定拓扑。受信解剖包络规则确定性生成归一化顶点权重，每顶点最多 4 个影响；绑定前检查拓扑 SHA-256。`weight_preset` 为 `anatomical_smooth_v1` 或 `anatomical_crisp_v1`。骨骼定义、实际权重表与权重哈希写入 `model_data.json`；运行时没有接受用户骨架或自由权重的接口。
 
 ## Atlas 与槽位
 
-两张图片均为 256×256、RGB PNG、sRGB。矩形格式为 `(x,y,width,height)`，原点在图片左上角；下表尺寸包含四周各 2 像素的扩色边距。当前每个 slot 只有一个默认及允许的 tile。
+两张图片均为 256×256、RGB PNG、sRGB。矩形格式为 `(x,y,width,height)`，原点在图片左上角；下表尺寸包含四周各 2 像素的扩色边距。glass 槽允许蓝、琥珀和暗三种 tile；其他 slot 各有一个允许的 tile。
 
 | Atlas | `tile_id` | `slot` | 矩形 | 允许的 pattern |
 |---|---|---|---|---|
@@ -91,6 +94,8 @@ ID 格式为 `[a-z][a-z0-9_]{0,47}`；revision 为 16 位小写十六进制字�
 | `environment_v1` | `env_stone_slate` | `stone` | `(96,0,32,32)` | `solid/checker` |
 | `environment_v1` | `env_iron_dark` | `metal` | `(128,0,32,32)` | `solid` |
 | `environment_v1` | `env_glass_blue` | `glass` | `(160,0,32,32)` | `solid` |
+| `environment_v1` | `env_glass_amber` | `glass` | `(192,0,32,32)` | `solid` |
+| `environment_v1` | `env_glass_dark` | `glass` | `(224,0,32,32)` | `solid` |
 | `character_v1` | `char_skin_mint` | `skin` | `(0,0,128,64)` | `solid/skin_speckle` |
 | `character_v1` | `char_face_sleepy` | `face` | `(128,0,64,64)` | `face_zombie/face_cute` |
 | `character_v1` | `char_shirt_plum` | `shirt` | `(0,64,128,64)` | `solid/stitches` |
@@ -118,6 +123,8 @@ Kit 的 `uv_template` 使用每个 Blender loop 的局部 `(s,t)`，左上原点
 | `src/b3dtile/geometry.py`、`model.py` | 受信几何生成、`KitInstance`、稳定语义区域、UV 模板及拓扑签名 |
 | `src/b3dtile/atlas.py`、`materials.py` | 普通 Python 像素绘画；Blender 材质和固定 UV 适配 |
 | `src/b3dtile/rig.py` | 固定骨架、权重生成、姿势验证和测试动画 |
+| `src/b3dtile/rig_presets.py` | 20/16/12 骨模板、骨骼映射、smooth/crisp 权重规则 |
+| `src/b3dtile/vertex_colors.py`、`uv_animation.py` | 区域顶点色、固定瓦片逐帧动画、glTF 扩展和独立验证 |
 | `src/b3dtile/glb.py` | 唯一 GLB 出口、二进制 accessor 检查、CPU 蒙皮及动画采样 |
 | `src/b3dtile/observation.py` | 多视图渲染、语义结构、图像定位、摘要与观察包 |
 | `src/b3dtile/lifecycle.py` | 受控进程结束，处理 Windows bpy 析构阶段的已知问题 |

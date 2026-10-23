@@ -674,7 +674,12 @@
           ]
         }
       },
-      "topology_sha256": "36abec0cf45b2ba9a7eca8fd4e384f3e3a93ea8813cfebcd33fc8321c0ea915f"
+      "topology_sha256": "36abec0cf45b2ba9a7eca8fd4e384f3e3a93ea8813cfebcd33fc8321c0ea915f",
+      "rig_presets": [
+        "humanoid_20_v1",
+        "humanoid_compact_16_v1",
+        "humanoid_basic_12_v1"
+      ]
     }
   ],
   "socket_types": {
@@ -940,6 +945,42 @@
       ],
       "default_pattern": "solid",
       "default_palette": "zombie16"
+    },
+    {
+      "id": "env_glass_amber",
+      "atlas_id": "environment_v1",
+      "slot": "glass",
+      "rect_px": [
+        192,
+        0,
+        32,
+        32
+      ],
+      "padding_px": 2,
+      "patterns": [
+        "solid"
+      ],
+      "default_pattern": "solid",
+      "default_palette": "pastel16",
+      "base_color_index": 10
+    },
+    {
+      "id": "env_glass_dark",
+      "atlas_id": "environment_v1",
+      "slot": "glass",
+      "rect_px": [
+        224,
+        0,
+        32,
+        32
+      ],
+      "padding_px": 2,
+      "patterns": [
+        "solid"
+      ],
+      "default_pattern": "solid",
+      "default_palette": "pastel16",
+      "base_color_index": 0
     }
   ],
   "slots": [
@@ -982,7 +1023,9 @@
       "id": "glass",
       "default_tile": "env_glass_blue",
       "allowed_tiles": [
-        "env_glass_blue"
+        "env_glass_blue",
+        "env_glass_amber",
+        "env_glass_dark"
       ]
     },
     {
@@ -1065,93 +1108,723 @@
       "compatible_kits": [
         "humanoid_round_v1"
       ],
+      "provenance": "original project-authored canonical A-pose; no third-party rig data",
+      "bone_count": 20,
+      "max_influences": 4,
+      "weight_presets": [
+        "anatomical_smooth_v1",
+        "anatomical_crisp_v1"
+      ],
+      "default_weight_preset": "anatomical_smooth_v1",
+      "weight_method": "Topology-locked anatomical envelopes, merged into this skeleton and normalized",
       "bones": [
         {
           "name": "root",
+          "head": [
+            0,
+            0,
+            0
+          ],
+          "tail": [
+            0,
+            0,
+            0.12
+          ],
           "parent": null
         },
         {
           "name": "pelvis",
+          "head": [
+            0,
+            0,
+            0.64
+          ],
+          "tail": [
+            0,
+            0,
+            0.79
+          ],
           "parent": "root"
         },
         {
           "name": "spine",
+          "head": [
+            0,
+            0,
+            0.79
+          ],
+          "tail": [
+            0,
+            0,
+            0.96
+          ],
           "parent": "pelvis"
         },
         {
           "name": "chest",
+          "head": [
+            0,
+            0,
+            0.96
+          ],
+          "tail": [
+            0,
+            0,
+            1.1
+          ],
           "parent": "spine"
         },
         {
           "name": "neck",
+          "head": [
+            0,
+            0,
+            1.1
+          ],
+          "tail": [
+            0,
+            0,
+            1.25
+          ],
           "parent": "chest"
         },
         {
           "name": "head",
+          "head": [
+            0,
+            0,
+            1.25
+          ],
+          "tail": [
+            0,
+            0,
+            1.54
+          ],
           "parent": "neck"
         },
         {
           "name": "clavicle_l",
+          "head": [
+            0,
+            0,
+            1.07
+          ],
+          "tail": [
+            0.25,
+            0,
+            1.07
+          ],
           "parent": "chest"
         },
         {
           "name": "upper_arm_l",
+          "head": [
+            0.25,
+            0,
+            1.07
+          ],
+          "tail": [
+            0.425,
+            0,
+            0.88
+          ],
           "parent": "clavicle_l"
         },
         {
           "name": "forearm_l",
+          "head": [
+            0.425,
+            0,
+            0.88
+          ],
+          "tail": [
+            0.555,
+            0,
+            0.71
+          ],
           "parent": "upper_arm_l"
         },
         {
           "name": "hand_l",
+          "head": [
+            0.555,
+            0,
+            0.71
+          ],
+          "tail": [
+            0.615,
+            0,
+            0.63
+          ],
           "parent": "forearm_l"
         },
         {
-          "name": "clavicle_r",
-          "parent": "chest"
-        },
-        {
-          "name": "upper_arm_r",
-          "parent": "clavicle_r"
-        },
-        {
-          "name": "forearm_r",
-          "parent": "upper_arm_r"
-        },
-        {
-          "name": "hand_r",
-          "parent": "forearm_r"
-        },
-        {
           "name": "thigh_l",
+          "head": [
+            0.125,
+            0,
+            0.69
+          ],
+          "tail": [
+            0.14,
+            0,
+            0.4
+          ],
           "parent": "pelvis"
         },
         {
           "name": "shin_l",
+          "head": [
+            0.14,
+            0,
+            0.4
+          ],
+          "tail": [
+            0.14,
+            0,
+            0.12
+          ],
           "parent": "thigh_l"
         },
         {
           "name": "foot_l",
+          "head": [
+            0.14,
+            0,
+            0.12
+          ],
+          "tail": [
+            0.14,
+            -0.14,
+            0.08
+          ],
           "parent": "shin_l"
         },
         {
+          "name": "clavicle_r",
+          "head": [
+            0,
+            0,
+            1.07
+          ],
+          "tail": [
+            -0.25,
+            0,
+            1.07
+          ],
+          "parent": "chest"
+        },
+        {
+          "name": "upper_arm_r",
+          "head": [
+            -0.25,
+            0,
+            1.07
+          ],
+          "tail": [
+            -0.425,
+            0,
+            0.88
+          ],
+          "parent": "clavicle_r"
+        },
+        {
+          "name": "forearm_r",
+          "head": [
+            -0.425,
+            0,
+            0.88
+          ],
+          "tail": [
+            -0.555,
+            0,
+            0.71
+          ],
+          "parent": "upper_arm_r"
+        },
+        {
+          "name": "hand_r",
+          "head": [
+            -0.555,
+            0,
+            0.71
+          ],
+          "tail": [
+            -0.615,
+            0,
+            0.63
+          ],
+          "parent": "forearm_r"
+        },
+        {
           "name": "thigh_r",
+          "head": [
+            -0.125,
+            0,
+            0.69
+          ],
+          "tail": [
+            -0.14,
+            0,
+            0.4
+          ],
           "parent": "pelvis"
         },
         {
           "name": "shin_r",
+          "head": [
+            -0.14,
+            0,
+            0.4
+          ],
+          "tail": [
+            -0.14,
+            0,
+            0.12
+          ],
           "parent": "thigh_r"
         },
         {
           "name": "foot_r",
+          "head": [
+            -0.14,
+            0,
+            0.12
+          ],
+          "tail": [
+            -0.14,
+            -0.14,
+            0.08
+          ],
           "parent": "shin_r"
         }
+      ]
+    },
+    {
+      "id": "humanoid_compact_16_v1",
+      "compatible_kits": [
+        "humanoid_round_v1"
       ],
-      "rest_pose": "A_v1",
-      "weight_method": "Versioned anatomical envelopes deterministically generate a normalized vertex-ID weight table; topology checksum is verified before binding. Table is saved in model_data.json.",
+      "provenance": "original project-authored canonical A-pose; no third-party rig data",
+      "bone_count": 16,
       "max_influences": 4,
-      "skinning": "linear_blend",
-      "preserve_volume": false
+      "weight_presets": [
+        "anatomical_smooth_v1",
+        "anatomical_crisp_v1"
+      ],
+      "default_weight_preset": "anatomical_smooth_v1",
+      "weight_method": "Topology-locked anatomical envelopes, merged into this skeleton and normalized",
+      "bones": [
+        {
+          "name": "root",
+          "head": [
+            0,
+            0,
+            0
+          ],
+          "tail": [
+            0,
+            0,
+            0.12
+          ],
+          "parent": null
+        },
+        {
+          "name": "pelvis",
+          "head": [
+            0,
+            0,
+            0.64
+          ],
+          "tail": [
+            0,
+            0,
+            0.79
+          ],
+          "parent": "root"
+        },
+        {
+          "name": "spine",
+          "head": [
+            0,
+            0,
+            0.79
+          ],
+          "tail": [
+            0,
+            0,
+            1.1
+          ],
+          "parent": "pelvis"
+        },
+        {
+          "name": "head",
+          "head": [
+            0,
+            0,
+            1.1
+          ],
+          "tail": [
+            0,
+            0,
+            1.54
+          ],
+          "parent": "head"
+        },
+        {
+          "name": "upper_arm_l",
+          "head": [
+            0.25,
+            0,
+            1.07
+          ],
+          "tail": [
+            0.425,
+            0,
+            0.88
+          ],
+          "parent": "spine"
+        },
+        {
+          "name": "forearm_l",
+          "head": [
+            0.425,
+            0,
+            0.88
+          ],
+          "tail": [
+            0.555,
+            0,
+            0.71
+          ],
+          "parent": "upper_arm_l"
+        },
+        {
+          "name": "hand_l",
+          "head": [
+            0.555,
+            0,
+            0.71
+          ],
+          "tail": [
+            0.615,
+            0,
+            0.63
+          ],
+          "parent": "forearm_l"
+        },
+        {
+          "name": "thigh_l",
+          "head": [
+            0.125,
+            0,
+            0.69
+          ],
+          "tail": [
+            0.14,
+            0,
+            0.4
+          ],
+          "parent": "pelvis"
+        },
+        {
+          "name": "shin_l",
+          "head": [
+            0.14,
+            0,
+            0.4
+          ],
+          "tail": [
+            0.14,
+            0,
+            0.12
+          ],
+          "parent": "thigh_l"
+        },
+        {
+          "name": "foot_l",
+          "head": [
+            0.14,
+            0,
+            0.12
+          ],
+          "tail": [
+            0.14,
+            -0.14,
+            0.08
+          ],
+          "parent": "shin_l"
+        },
+        {
+          "name": "upper_arm_r",
+          "head": [
+            -0.25,
+            0,
+            1.07
+          ],
+          "tail": [
+            -0.425,
+            0,
+            0.88
+          ],
+          "parent": "spine"
+        },
+        {
+          "name": "forearm_r",
+          "head": [
+            -0.425,
+            0,
+            0.88
+          ],
+          "tail": [
+            -0.555,
+            0,
+            0.71
+          ],
+          "parent": "upper_arm_r"
+        },
+        {
+          "name": "hand_r",
+          "head": [
+            -0.555,
+            0,
+            0.71
+          ],
+          "tail": [
+            -0.615,
+            0,
+            0.63
+          ],
+          "parent": "forearm_r"
+        },
+        {
+          "name": "thigh_r",
+          "head": [
+            -0.125,
+            0,
+            0.69
+          ],
+          "tail": [
+            -0.14,
+            0,
+            0.4
+          ],
+          "parent": "pelvis"
+        },
+        {
+          "name": "shin_r",
+          "head": [
+            -0.14,
+            0,
+            0.4
+          ],
+          "tail": [
+            -0.14,
+            0,
+            0.12
+          ],
+          "parent": "thigh_r"
+        },
+        {
+          "name": "foot_r",
+          "head": [
+            -0.14,
+            0,
+            0.12
+          ],
+          "tail": [
+            -0.14,
+            -0.14,
+            0.08
+          ],
+          "parent": "shin_r"
+        }
+      ]
+    },
+    {
+      "id": "humanoid_basic_12_v1",
+      "compatible_kits": [
+        "humanoid_round_v1"
+      ],
+      "provenance": "original project-authored canonical A-pose; no third-party rig data",
+      "bone_count": 12,
+      "max_influences": 4,
+      "weight_presets": [
+        "anatomical_smooth_v1",
+        "anatomical_crisp_v1"
+      ],
+      "default_weight_preset": "anatomical_smooth_v1",
+      "weight_method": "Topology-locked anatomical envelopes, merged into this skeleton and normalized",
+      "bones": [
+        {
+          "name": "root",
+          "head": [
+            0,
+            0,
+            0
+          ],
+          "tail": [
+            0,
+            0,
+            0.12
+          ],
+          "parent": null
+        },
+        {
+          "name": "pelvis",
+          "head": [
+            0,
+            0,
+            0.64
+          ],
+          "tail": [
+            0,
+            0,
+            0.79
+          ],
+          "parent": "root"
+        },
+        {
+          "name": "spine",
+          "head": [
+            0,
+            0,
+            0.79
+          ],
+          "tail": [
+            0,
+            0,
+            1.1
+          ],
+          "parent": "pelvis"
+        },
+        {
+          "name": "head",
+          "head": [
+            0,
+            0,
+            1.1
+          ],
+          "tail": [
+            0,
+            0,
+            1.54
+          ],
+          "parent": "head"
+        },
+        {
+          "name": "upper_arm_l",
+          "head": [
+            0.25,
+            0,
+            1.07
+          ],
+          "tail": [
+            0.425,
+            0,
+            0.88
+          ],
+          "parent": "spine"
+        },
+        {
+          "name": "forearm_l",
+          "head": [
+            0.425,
+            0,
+            0.88
+          ],
+          "tail": [
+            0.615,
+            0,
+            0.63
+          ],
+          "parent": "upper_arm_l"
+        },
+        {
+          "name": "thigh_l",
+          "head": [
+            0.125,
+            0,
+            0.69
+          ],
+          "tail": [
+            0.14,
+            0,
+            0.4
+          ],
+          "parent": "pelvis"
+        },
+        {
+          "name": "shin_l",
+          "head": [
+            0.14,
+            0,
+            0.4
+          ],
+          "tail": [
+            0.14,
+            -0.14,
+            0.08
+          ],
+          "parent": "thigh_l"
+        },
+        {
+          "name": "upper_arm_r",
+          "head": [
+            -0.25,
+            0,
+            1.07
+          ],
+          "tail": [
+            -0.425,
+            0,
+            0.88
+          ],
+          "parent": "spine"
+        },
+        {
+          "name": "forearm_r",
+          "head": [
+            -0.425,
+            0,
+            0.88
+          ],
+          "tail": [
+            -0.615,
+            0,
+            0.63
+          ],
+          "parent": "upper_arm_r"
+        },
+        {
+          "name": "thigh_r",
+          "head": [
+            -0.125,
+            0,
+            0.69
+          ],
+          "tail": [
+            -0.14,
+            0,
+            0.4
+          ],
+          "parent": "pelvis"
+        },
+        {
+          "name": "shin_r",
+          "head": [
+            -0.14,
+            0,
+            0.4
+          ],
+          "tail": [
+            -0.14,
+            -0.14,
+            0.08
+          ],
+          "parent": "thigh_r"
+        }
+      ]
     }
   ],
   "pose_presets": [
@@ -1232,9 +1905,12 @@
   },
   "source_hashes": {
     "geometry.py": "6220e4da796784a9b6247a9172609a7f07850778695b939bbc9524160acd3fe9",
-    "rig.py": "81ca1e4c95896b3ef7dd27d117bdee186ed2ff1853fda81a050247bb954ab2be",
-    "atlas.py": "6a9d369f892b9600c9641aa94d92d4b2c712d4c14f1118b8c724f5bd13475c88",
-    "materials.py": "3157cafd34db8e68e26457686a734e9f2071f1918d3caf3a48cdb7fc011b40bc"
+    "rig.py": "a3952772e46d3b038e178caed2fff851311a3838d7740afce2d5ea669b8549cb",
+    "rig_presets.py": "b7f05194295c585d18a872ae0be735e3fbe0be14da88e112125c4a6d4e5bf4c2",
+    "atlas.py": "d2f8475412f9ea8d2a67808e71eff97b4d2414b73d4851754bad1bab376ffac1",
+    "materials.py": "4530eaf6debaddff36403bf4a0ae53495ac9d4b85b4f5e1a4fb43a0f329b1423",
+    "vertex_colors.py": "a461c2ba9491659a5abe9e3114c9d964b5a9e6e156171c670d738d96d12ebce7",
+    "uv_animation.py": "cf3fc03b4b2f63d0959e3753a70543039117b7903aa913bf208357f92ab3bb1e"
   },
   "observation_policy": {
     "snapshot": "final frozen scene, never an intermediate command state",
@@ -1246,11 +1922,82 @@
       "wireframe",
       "object_id",
       "uv_debug",
+      "vertex_color",
+      "uv_animation_frames",
       "atlas_uv",
       "pose",
       "contact_sheet"
     ],
     "failure": "previous successful revision is retained, with latest accepted build attempt status reported separately",
     "external_edits": "External Blender UI/.blend edits are not watched; rebuild a recipe to publish a new observation."
+  },
+  "weight_presets": [
+    {
+      "id": "anatomical_smooth_v1",
+      "topology_locked": true,
+      "max_influences": 4,
+      "description": "Deterministic normalized weights; crisp uses exponent 1.35 after merging bones"
+    },
+    {
+      "id": "anatomical_crisp_v1",
+      "topology_locked": true,
+      "max_influences": 4,
+      "description": "Deterministic normalized weights; crisp uses exponent 1.35 after merging bones"
+    }
+  ],
+  "vertex_color_policy": {
+    "styles": [
+      "solid",
+      "height_gradient"
+    ],
+    "blend": "multiply_atlas",
+    "domain": "CORNER",
+    "export": "COLOR_0 linear RGBA",
+    "unpainted": "white",
+    "alpha": 1
+  },
+  "uv_animation_presets": [
+    {
+      "id": "signal_blink_v1",
+      "slot": "glass",
+      "frames": [
+        "env_glass_blue",
+        "env_glass_dark"
+      ],
+      "fps": [
+        1,
+        2,
+        4,
+        8
+      ]
+    },
+    {
+      "id": "signal_cycle_v1",
+      "slot": "glass",
+      "frames": [
+        "env_glass_blue",
+        "env_glass_amber",
+        "env_glass_dark",
+        "env_glass_amber"
+      ],
+      "fps": [
+        1,
+        2,
+        4,
+        8
+      ]
+    }
+  ],
+  "uv_animation_policy": {
+    "max_tracks": 4,
+    "interpolation": "STEP",
+    "loop": true,
+    "export": [
+      "KHR_animation_pointer",
+      "KHR_texture_transform"
+    ],
+    "fallback": "static first frame",
+    "sidecar": "uv_animation.json",
+    "scope": "enumerated same-size atlas flipbooks; no arbitrary UV paths"
   }
 }
